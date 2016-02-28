@@ -2,6 +2,7 @@ import json
 
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
+from backend.models import User
 
 
 # Create your views here.
@@ -15,24 +16,25 @@ def index(request):
     return HttpResponse(json.dumps(d))
 
 
-@require_POST
 def userRegister(request):
     """ Register a new user into the database.
 
     :param request: the request that contains values.
     :return: the http response to the client.
     """
+    u = User(first_name="Nicolas", last_name="Borie", phone="0102030405")
+    u.save()
     return HttpResponse("userRegister")
 
 
-@require_POST
 def userLogin(request):
     """ Login a user in order to create a session.
 
     :param request: the request that contains values.
     :return: the http response to the client.
     """
-    return HttpResponse("userLogin")
+
+    return HttpResponse(", ".join([str(t) for t in User.objects.all()]))
 
 
 @require_POST
