@@ -17,6 +17,9 @@ from django.conf.urls import url, include
 from django.contrib import admin
 
 urlpatterns = [
-    url(r'^api/', include('backend.urls')),
+    # TODO Keep those lines in case we split in two apps
+    # url(r'^users/', include('backend.urls')),
+    # url(r'^alerts/', include('backend.urls')),
+    url(r'^', include('backend.urls')),
     url(r'^admin/', admin.site.urls),
 ]
