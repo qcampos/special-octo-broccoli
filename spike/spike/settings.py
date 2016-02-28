@@ -74,7 +74,7 @@ WSGI_APPLICATION = 'spike.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
-SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
+#SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
 
 DATABASES = {
     'default': {
