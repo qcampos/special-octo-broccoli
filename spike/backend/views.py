@@ -1,9 +1,12 @@
 import json
 
+from django.core.exceptions import ValidationError
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
-from backend.models import User
+from functools import reduce
+
+from backend.models import User, Alert
 
 # HTTP Return Codes
 HTTP_OK = 200
@@ -14,13 +17,64 @@ HTTP_INTERNAL_SERVER_ERROR = 500
 # Application Error codes
 APP_MALFORMED_JSON = 1
 APP_MISSING_DATA = 2
+APP_INVALID_DATA = 3
+
+
+# Classic answers
+def answerMalformedJson():
+    """ Return a valid http answer to inform the user that the received json was malformed, with the right error code
+    and a potentially more specific message.
+
+    :return: the HttpReponse object fully initialized.
+    """
+    return genJsonResponse(json.dumps({"error": {"code": APP_MALFORMED_JSON, "message": "Malformed JSON"}}),
+                           return_code=HTTP_BAD_REQUEST)
+
+
+def answerIncompleteJson():
+    """ Return a valid http answer to inform the user that the received json was missing some keys, with the right error
+     code and a potentially more specific message.
+
+    :return: the HttpReponse object fully initialized.
+    """
+    return genJsonResponse(json.dumps({"error": {"code": APP_MISSING_DATA, "message": "Incomplete JSON"}}),
+                           return_code=HTTP_BAD_REQUEST)
+
+
+def answerJsonValidation(ve):
+    """ Return a valid http answer to inform the user that the received json was invalid at a semantic level because
+    some values were not valid.
+
+    :param ve: the ValidationError object witch contains all the error messages.
+    :return: the HttpResponse object fully initialized.
+    """
+    d = ve.message_dict
+    content = ", ".join(["{}:{}".format(t, d[t]) for t in d])
+    return genJsonResponse(json.dumps({"error": {"code": APP_INVALID_DATA, "message": content}}),
+                           return_code=HTTP_BAD_REQUEST)
 
 
 def genJsonResponse(json_string, return_code=200):
+    """ Create a valid HTTP response containing the given arguments.
+
+    :param json_string: the content of the answer.
+    :param return_code: the status code of the answer.
+    :return: a HttpResponse object fully initialized.
+    """
     return HttpResponse(content=json_string, status=return_code, content_type="application/json")
 
 
-# Create your views here.
+def validateJson(dictionary, keys):
+    """ Ensure that the given dictionary contains all the given keys.
+    :param dictionary: the dictionary
+    :param keys: a list of hashable objects.
+    :return: True is all the objects of the keys list are into the dictionary.
+    """
+    return reduce(lambda x, y: x and y, [t in dictionary for t in keys])
+
+    # Create your views here.
+
+
 def index(request):
     """
     This one is when you need to smile
@@ -40,25 +94,29 @@ def userRegister(request):
     :param request: the request that contains values.
     :return: the http response to the client.
     """
-    json_data = None
-
+    # Parse the json string into a dictionary.
     try:
         json_data = json.loads(request.body.decode('utf-8'))
     except ValueError:
-        return genJsonResponse(json.dumps({"error": {"code": APP_MALFORMED_JSON, "message": "Malformed JSON"}}),
-                               status=HTTP_BAD_REQUEST)
+        return answerMalformedJson()
 
-    if "phone" not in json_data or "first_name" not in json_data or "last_name" not in json_data\
-            or "pin" not in json_data:
-        return HttpResponse(json.dumps({"error": {"code": APP_MISSING_DATA, "message": "Incomplete JSON"}}),
-                            status=HTTP_BAD_REQUEST)
+    # Check that all expected keys are here.
+    requiredKeys = ["phone", "first_name", "last_name", "pin"]
+    if not validateJson(json_data, requiredKeys):
+        return answerIncompleteJson()
 
-    #TODO Validation, how does it works?
+    # Create and check the validity of the user
     newUser = User(phone=json_data["phone"], first_name=json_data["first_name"], last_name=json_data["last_name"],
                    pin=json_data["pin"])
-    newUser.save()
+    try:
+        newUser.clean()
+        newUser.clean_fields()
+    except ValidationError as ve:
 
-    return HttpResponse(json.dumps({"success": True}))
+        return answerJsonValidation(ve)
+
+    newUser.save()
+    return genJsonResponse(json.dumps({"success": True}))
 
 
 def userLogin(request):

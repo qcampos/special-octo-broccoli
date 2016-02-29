@@ -1,11 +1,16 @@
 import uuid
 
 from django.contrib.gis.db import models
-from django.contrib.gis.geos import Point, GEOSGeometry
+from django.contrib.gis.geos import GEOSGeometry
+from  django.core import validators
+
+
+#  Custom validators
+def phoneValidator(value):
+    return
 
 
 # Create your models here.
-
 class Alert(models.Model):
     """ Represents an alert on a specific position.
     """
@@ -30,17 +35,18 @@ class Alert(models.Model):
         return pnt.distance(pnt2) * 100
 
     def __str__(self):
-        return "Alert({}, {}, ({},{}))".format(self.name, self.author, self.position.x, self.position.y)
+        return "{} by {} at ({},{})".format(self.name, self.author, self.position.x, self.position.y)
 
 
 class User(models.Model):
     """ User class represents a user of the application.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    phone = models.CharField("Phone number", max_length=12)
+    pin = models.CharField(max_length=4)
+    phone = models.CharField("Phone number", max_length=12,
+                             validators=[validators.RegexValidator(regex=r"^\+3{2}\d{9}|\d{10}$")])
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    pin = models.CharField(max_length=4)
 
     def __str__(self):
-        return "User({}, {}, {})".format(self.first_name, self.last_name, self.phone)
+        return "{} : {} {}".format(self.pin, self.first_name, self.last_name)
