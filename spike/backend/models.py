@@ -33,6 +33,7 @@ class Alert(models.Model):
 
     # longitude = models.DecimalField(max_digits=9, decimal_places=6)
     # latitude = models.DecimalField(max_digits=9, decimal_places=6)
+    isActive = models.BooleanField(default=True)
 
     def distance(self, position):
         """ Compute the distance between the current alert and a given position.
