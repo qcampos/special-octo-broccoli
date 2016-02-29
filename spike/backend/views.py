@@ -285,7 +285,20 @@ def userCheckEmail(request):
     :param request: the HTTP Request
     :return: a fully initialized HTTP Response
     """
-    return answerSuccess(False)
+
+    # Getting JSON Data
+    try:
+        requiredKeys = ["mail"]
+        json_data = doInitialChecks(neededValues=requiredKeys, request=request)
+    except RestMethodInitFail as fail:
+        return fail.response
+
+    # If we found an user, we lose
+    try:
+        User.objects.filter(mail=json_data["mail"]).get()
+        return answerSuccess(False)
+    except User.DoesNotExist:
+        return answerSuccess(True)
 
 
 @csrf_exempt
@@ -296,7 +309,20 @@ def userCheckPhone(request):
     :param request: the HTTP Request
     :return: a fully initialized HTTP Response
     """
-    return answerSuccess(False)
+
+    # Getting JSON Data
+    try:
+        requiredKeys = ["phone"]
+        json_data = doInitialChecks(neededValues=requiredKeys, request=request)
+    except RestMethodInitFail as fail:
+        return fail.response
+
+    # If we found an user, we lose
+    try:
+        User.objects.filter(phone=json_data["phone"]).get()
+        return answerSuccess(False)
+    except User.DoesNotExist:
+        return answerSuccess(True)
 
 
 @csrf_exempt
@@ -341,3 +367,15 @@ def alertClose(request):
     :return: the http response to the client.
     """
     return HttpResponse("alertClose")
+
+
+@csrf_exempt
+@require_POST
+def alertValidate(request):
+    """ Votes for an event
+
+    :param request: the HTTP Request
+    :return:  the HTTP Response
+    """
+
+    return HttpResponse("alertValidate")
