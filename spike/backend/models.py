@@ -50,8 +50,11 @@ class Alert(models.Model):
 
 
 class Session(models.Model):
-    """ Represents the sessions inside the application 
+    """ Represents the sessions inside the application
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     expiration = models.DateTimeField(editable=False)
     user = models.ForeignKey('User', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "{} for {} expires at {}".format(self.id, self.user, self.expiration)

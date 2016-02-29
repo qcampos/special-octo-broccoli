@@ -1,5 +1,5 @@
 from django.contrib import admin
-from backend.models import User, Alert
+from backend.models import User, Alert, Session
 
 
 # Register your models here.
@@ -23,5 +23,14 @@ class AlertAdmin(admin.ModelAdmin):
     search_fields = ['name', 'author']
 
 
+class SessionAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {'fields': ['id', 'user', 'expiration']})
+    ]
+    list_display = ['id', 'user', 'expiration']
+    search_fields = ['id']
+
+
 admin.site.register(User, UserAdmin)
 admin.site.register(Alert, AlertAdmin)
+admin.site.register(Session, SessionAdmin)
