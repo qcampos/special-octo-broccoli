@@ -58,3 +58,12 @@ class Session(models.Model):
 
     def __str__(self):
         return "{} for {} expires at {}".format(self.id, self.user, self.expiration)
+
+
+class Vote(models.Model):
+    """ Represents the votes for a given alert
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    value = models.BooleanField()
+    alert = models.ForeignKey(Alert, on_delete=models.CASCADE)
