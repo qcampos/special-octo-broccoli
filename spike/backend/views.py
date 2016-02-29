@@ -5,8 +5,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 from functools import reduce
+from datetime import datetime, timedelta
 
-from backend.models import User, Alert
+from backend.models import User, Alert, Session
 
 # HTTP Return Codes
 HTTP_OK = 200
@@ -56,6 +57,35 @@ def answerJsonValidation(ve):
                            return_code=HTTP_BAD_REQUEST)
 
 
+def answerLoginFailed(message):
+    """ Return a valid http answer to inform the user that he couldn't properly login
+
+    :param message: the login explanation of why he couldn't login
+    :return: the HttpResponse object fully initialized
+    """
+    return genJsonResponse(json.dumps({"error" : {"code": APP_LOGIN_FAILED, "message": message}}),
+                           return_code=HTTP_UNAUTHORISED)
+
+
+def answerSuccess(success):
+    """ Return a valid http answer to inform the user of the success of the operation
+
+    :param success: a boolean indicating success status
+    :return: the HttpResponse object fully initialized
+    """
+    return genJsonResponse(json.dumps({"success": success}))
+
+
+def answerSession(session, expiration):
+    """ Return a valid http answer to inform the user of the attribution of a new session
+
+    :param session: the session id
+    :param expiration: the timestamp for the expiration of the session
+    :return: the HttpResponse object fully initialized
+    """
+    return genJsonResponse(json.dumps({"session": str(session), "expire": str(expiration)}))
+
+
 def genJsonResponse(json_string, return_code=200):
     """ Create a valid HTTP response containing the given arguments.
 
@@ -76,6 +106,7 @@ def validateJson(dictionary, keys):
     return reduce(lambda x, y: x and y, [t in dictionary for t in keys])
 
 
+# Refactoring the JSON POST Body parsing
 class RestMethodInitFail(Exception):
     """ The Exception class used to know when method initialization failed
 
@@ -104,8 +135,7 @@ def doInitialChecks(neededValues, request):
         raise RestMethodInitFail(answerMalformedJson())
 
     # Check that all expected keys are here.
-    requiredKeys = ["phone", "first_name", "last_name", "pin"]
-    if not validateJson(json_data, requiredKeys):
+    if not validateJson(json_data, neededValues):
         raise RestMethodInitFail(answerIncompleteJson())
 
     return json_data
@@ -136,19 +166,19 @@ def userRegister(request):
     :return: the http response to the client.
     """
 
+    # Getting JSON Data
     try:
-        requiredKeys = ["phone", "first_name", "last_name", "pin"]
+        requiredKeys = ["phone", "mail", "first_name", "last_name", "pin"]
         json_data = doInitialChecks(neededValues=requiredKeys, request=request)
     except RestMethodInitFail as fail:
         return fail.response
 
     # Create and check the validity of the user
     newUser = User(phone=json_data["phone"], first_name=json_data["first_name"], last_name=json_data["last_name"],
-                   pin=json_data["pin"])
+                   pin=json_data["pin"], mail=json_data["mail"])
     try:
         # This needs to be done with the two methods, each checks something
-        newUser.clean()
-        newUser.clean_fields()
+        newUser.full_clean(validate_unique=True)
     except ValidationError as ve:
         return answerJsonValidation(ve)
 
@@ -165,19 +195,39 @@ def userLogin(request):
     :return: the http response to the client.
     """
 
+    # Getting JSON Data
     try:
         requiredKeys = ["login", "pass"]
         json_data = doInitialChecks(neededValues=requiredKeys, request=request)
     except RestMethodInitFail as fail:
         return fail.response
 
-    return HttpResponse(", ".join([str(t) for t in User.objects.all()]))
+    # Trying to get the user
+    try:
+        user = User.objects.filter(mail=json_data['login']).get()
+    except User.DoesNotExist:
+        return answerLoginFailed("User not found")
+
+    # Checking the password
+    if user.pin != json_data['pass']:
+        return answerLoginFailed("Wrong Pin")
+
+    # Removing old sessions
+    for oldSession in Session.objects.filter(user=user):
+        oldSession.delete()
+
+    # Creating the session with an expireation time of
+    expiration = datetime.now() + timedelta(days=1)
+    session = Session(user=user, expiration=expiration)
+    session.save()
+
+    return answerSession(session.id, expiration)
 
 
 @csrf_exempt
 @require_POST
 def alertGetlist(request):
-    """ Get a list of the avtive alerts.
+    """ Get a list of the active alerts given an user position
 
     :param request: the request that contains values.
     :return: the http response to the client.
