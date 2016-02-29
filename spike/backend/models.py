@@ -47,4 +47,7 @@ class Alert(models.Model):
         return "{} by {} at ({},{})".format(self.name, self.author, self.position.x, self.position.y)
 
 
-
+class Session(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    expiration = models.DateTimeField(editable=False)
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
