@@ -10,10 +10,11 @@ class User(models.Model):
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     pin = models.CharField(max_length=4)
-    phone = models.CharField("Phone number", max_length=12,
+    phone = models.CharField("Phone number", max_length=12, unique=True,
                              validators=[validators.RegexValidator(regex=r"^\+3{2}\d{9}|\d{10}$")])
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+    mail = models.CharField(max_length=512, unique=True, validators=[validators.EmailValidator])
 
     def __str__(self):
         return "{} : {} {}".format(self.pin, self.first_name, self.last_name)
