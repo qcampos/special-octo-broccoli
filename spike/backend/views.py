@@ -49,8 +49,8 @@ def answerJsonValidation(ve):
     :return: the HttpResponse object fully initialized.
     """
     d = ve.message_dict
-    content = ", ".join(["{}:{}".format(t, d[t]) for t in d])
-    return genJsonResponse(json.dumps({"error": {"code": APP_INVALID_DATA, "message": content}}),
+    return genJsonResponse(json.dumps({"error": {"code": APP_INVALID_DATA, "message": "Error while validating data",
+                                                 "data": d}}),
                            return_code=HTTP_BAD_REQUEST)
 
 
@@ -72,12 +72,13 @@ def validateJson(dictionary, keys):
     """
     return reduce(lambda x, y: x and y, [t in dictionary for t in keys])
 
-    # Create your views here.
+
+# Create your views here.
 
 
 def index(request):
-    """
-    This one is when you need to smile
+    """ This one is when you need to smile
+
     :param request:
     :return:
     """
@@ -109,16 +110,18 @@ def userRegister(request):
     newUser = User(phone=json_data["phone"], first_name=json_data["first_name"], last_name=json_data["last_name"],
                    pin=json_data["pin"])
     try:
+        # This needs to be done with the two methods, each checks something
         newUser.clean()
         newUser.clean_fields()
     except ValidationError as ve:
-
         return answerJsonValidation(ve)
 
     newUser.save()
     return genJsonResponse(json.dumps({"success": True}))
 
 
+@csrf_exempt
+@require_POST
 def userLogin(request):
     """ Login a user in order to create a session.
 
@@ -129,6 +132,7 @@ def userLogin(request):
     return HttpResponse(", ".join([str(t) for t in User.objects.all()]))
 
 
+@csrf_exempt
 @require_POST
 def alertGetlist(request):
     """ Get a list of the avtive alerts.
@@ -139,6 +143,7 @@ def alertGetlist(request):
     return HttpResponse("alertGetlist")
 
 
+@csrf_exempt
 @require_POST
 def alertGet(request):
     """ Get a specific alert by id.
@@ -149,6 +154,7 @@ def alertGet(request):
     return HttpResponse("alertGet")
 
 
+@csrf_exempt
 @require_POST
 def alertAdd(request):
     """ Add an alert to the currently active alerts.
@@ -159,6 +165,7 @@ def alertAdd(request):
     return HttpResponse("alertAdd")
 
 
+@csrf_exempt
 @require_POST
 def alertUpdate(request):
     """ Update an existing alert.
@@ -169,6 +176,7 @@ def alertUpdate(request):
     return HttpResponse("alertUpdate")
 
 
+@csrf_exempt
 @require_POST
 def alertClose(request):
     """ Close an alert which has the effect of setting it inactive.
@@ -179,6 +187,7 @@ def alertClose(request):
     return HttpResponse("alertClose")
 
 
+@csrf_exempt
 @require_POST
 def alertMyalerts(request):
     """ Get a list of all the alerts created by the current user.

@@ -5,9 +5,18 @@ from django.contrib.gis.geos import GEOSGeometry
 from  django.core import validators
 
 
-#  Custom validators
-def phoneValidator(value):
-    return
+class User(models.Model):
+    """ User class represents a user of the application.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    pin = models.CharField(max_length=4)
+    phone = models.CharField("Phone number", max_length=12,
+                             validators=[validators.RegexValidator(regex=r"^\+3{2}\d{9}|\d{10}$")])
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return "{} : {} {}".format(self.pin, self.first_name, self.last_name)
 
 
 # Create your models here.
@@ -38,15 +47,4 @@ class Alert(models.Model):
         return "{} by {} at ({},{})".format(self.name, self.author, self.position.x, self.position.y)
 
 
-class User(models.Model):
-    """ User class represents a user of the application.
-    """
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    pin = models.CharField(max_length=4)
-    phone = models.CharField("Phone number", max_length=12,
-                             validators=[validators.RegexValidator(regex=r"^\+3{2}\d{9}|\d{10}$")])
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
 
-    def __str__(self):
-        return "{} : {} {}".format(self.pin, self.first_name, self.last_name)
