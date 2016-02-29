@@ -63,3 +63,6 @@ target/
 
 #pycharm Data
 spike/.idea/
+
+#Database
+spike/db.sqlite3
