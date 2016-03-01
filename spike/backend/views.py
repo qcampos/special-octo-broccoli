@@ -242,20 +242,30 @@ GCM_API_URL = "https://gcm-http.googleapis.com/gcm/send"
 
 
 def GCMPostToTopic(topic, data):
+    """ Try to send a message to a given topic
+
+    :param topic: a string containg a topic name
+    :param data: a dictionnary containg the data
+    :return: True if the message could be sent, False if not (and the reason is logged
+    """
     headers = {'Authorization': "key:{}".format(GCM_API_KEY), 'Content-Type': 'application/json'}
     data = {
         "to": "/topic/{}".format(topic),
         "data": data,
         "priority": "high"
     }
-    req = urllib.request.Request(url=GCM_API_URL, data=data)
+    req = urllib.request.Request(url=GCM_API_URL, data=json.dumps(data))
 
     try:
         urllib.request.urlopen(req)
     except urllib.error.HTTPError as err:
         logging.error("HTTP error code {} received when sending messing to GCM".format(err.code))
+        return False
     except urllib.error.URLError as err:
         logging.error("The url {} couldn't be reached".format(GCM_API_URL))
+        return False
+
+    return True
 
 
 ##############################
