@@ -43,13 +43,13 @@ class User(models.Model):
     last_position = models.PointField(srid=4326, blank=True, null=True)
     radius = models.FloatField(default=10000.0, blank=True, null=True)
 
-    def updatePosition(self, lon, lat):
+    def updatePosition(self, lat, lon):
         # Persist the last position
         if self.last_position:
             p = PositionHistory(user=self, position=self.last_position)
             p.save()
         # Than change the current
-        pnt = GEOSGeometry('SRID=4326;POINT({} {})'.format(lon, lat))
+        pnt = GEOSGeometry('SRID=4326;POINT({} {})'.format(lat, lon))
         self.last_position = pnt
         self.full_clean()
         self.save()
@@ -78,9 +78,8 @@ class Alert(models.Model):
         :param position a point with "x" and "y" fields set to a gps coordinate.
         :return: the distance between the current alert and the given position.
         """
-        pnt = GEOSGeometry('SRID=4326;POINT({} {})'.format(self.alert_position.x, self.alert_position.y))
         pnt2 = GEOSGeometry('SRID=4326;POINT({} {})'.format(position.x, position.y))
-        return pnt.distance(pnt2)
+        return self.alert_position.distance(pnt2) * 100 * 1000  # *100 to get Km, then *1000 for meters.
 
     def getScore(self):
         return reduce(lambda x, y: x + y, map(lambda x: 1 if x.value else -1, self.vote_set.all()), 0)

@@ -16,13 +16,19 @@ class PositionHistoryInline(admin.TabularInline):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
+    readonly_fields = ['view_position']
     fieldsets = [
         ("Identity", {'fields': [('first_name', 'last_name'), ('mail', 'phone')]}),
-        ('User data', {'fields': ['pin', 'last_position']}),
+        ('User data', {'fields': ['pin', 'view_position']}),
+        ("Position", {'fields': ['last_position', ], 'classes': ['collapse']}),
     ]
-    list_display = ['id', 'mail', 'first_name', 'last_name']
+    list_display = ['id', 'mail', 'first_name', 'last_name', 'view_position']
     search_fields = ['mail', 'first_name', 'last_name']
-    inlines = [PositionHistoryInline]
+
+    def view_position(self, obj):
+        return "({}, {})".format(obj.last_position.x, obj.last_position.y)
+
+    view_position.short_description = "Position"
 
 
 @admin.register(Alert)
