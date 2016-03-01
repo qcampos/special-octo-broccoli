@@ -40,8 +40,8 @@ class User(models.Model):
     mail = models.CharField(max_length=512, unique=True, validators=[validators.EmailValidator])
 
     #  Srid 4326 is compatible with longitude and latitude provided by Google's API
-    last_position = models.PointField(srid=4326, null=True)
-    radius = models.FloatField(default=10000.0)
+    last_position = models.PointField(srid=4326, blank=True, null=True)
+    radius = models.FloatField(default=10000.0, blank=True, null=True)
 
     def updatePosition(self, lon, lat):
         # Persist the last position
