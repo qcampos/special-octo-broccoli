@@ -9,6 +9,10 @@ from django.views.decorators.http import require_POST
 from functools import reduce
 from django.contrib.gis.geos import Point, GEOSGeometry
 import uuid
+import urllib.request
+import urllib.error
+import urllib.response
+import logging
 
 from backend.models import User, Alert, Session, Vote
 
@@ -226,6 +230,32 @@ def checkSession(sessionId):
         return session.user
     except Session.DoesNotExist:
         raise SessionCheckFail(answerSessionNotFound())
+
+
+############################################################
+# Refactoring the part where we make actual API call to GCM
+############################################################
+
+# TODO Move to settings?
+GCM_API_KEY = "AIzaSyCA0nYK3waZc5VIeCbCHlE  tw8NBpjOzzbI"
+GCM_API_URL = "https://gcm-http.googleapis.com/gcm/send"
+
+
+def GCMPostToTopic(topic, data):
+    headers = {'Authorization': "key:{}".format(GCM_API_KEY), 'Content-Type': 'application/json'}
+    data = {
+        "to": "/topic/{}".format(topic),
+        "data": data,
+        "priority": "high"
+    }
+    req = urllib.request.Request(url=GCM_API_URL, data=data)
+
+    try:
+        urllib.request.urlopen(req)
+    except urllib.error.HTTPError as err:
+        logging.error("HTTP error code {} received when sending messing to GCM".format(err.code))
+    except urllib.error.URLError as err:
+        logging.error("The url {} couldn't be reached".format(GCM_API_URL))
 
 
 ##############################
