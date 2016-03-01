@@ -28,9 +28,11 @@ class PositionHistory(models.Model):
 class User(models.Model):
     """ User class represents a user of the application.
     """
+    # Identification values
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     pin = models.CharField(max_length=4)
 
+    # Personal values
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     phone = models.CharField("Phone number", max_length=12, unique=True,
@@ -39,6 +41,7 @@ class User(models.Model):
 
     #  Srid 4326 is compatible with longitude and latitude provided by Google's API
     last_position = models.PointField(srid=4326, null=True)
+    radius = models.FloatField(default=10000.0)
 
     def updatePosition(self, lon, lat):
         # Persist the last position
@@ -77,10 +80,10 @@ class Alert(models.Model):
         """
         pnt = GEOSGeometry('SRID=4326;POINT({} {})'.format(self.alert_position.x, self.alert_position.y))
         pnt2 = GEOSGeometry('SRID=4326;POINT({} {})'.format(position.x, position.y))
-        return pnt.distance(pnt2) * 100
+        return pnt.distance(pnt2)
 
     def getScore(self):
-        return reduce(lambda x, y: x + y, map(lambda x: 1 if x.value else -1, self.vote_set.all()))
+        return reduce(lambda x, y: x + y, map(lambda x: 1 if x.value else -1, self.vote_set.all()), 0)
 
     getScore.short_description = 'Score'
 
