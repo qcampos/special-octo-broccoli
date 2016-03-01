@@ -1,12 +1,13 @@
 import json
 
+import datetime
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 from functools import reduce
-from datetime import datetime, timedelta
-from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import Point, GEOSGeometry
 import uuid
 
 from backend.models import User, Alert, Session, Vote
@@ -219,7 +220,7 @@ def checkSession(sessionId):
     """
     try:
         session = Session.objects.filter(id=sessionId).get()
-        if session.expiration < datetime.now():
+        if session.expiration < timezone.make_aware(datetime.datetime.now(), timezone.get_default_timezone()):
             session.delete()
             raise SessionCheckFail(answerSessionExpired())
         return session.user
@@ -263,7 +264,6 @@ def userRegister(request):
     newUser = User(phone=json_data["phone"], first_name=json_data["first_name"], last_name=json_data["last_name"],
                    pin=json_data["pin"], mail=json_data["mail"])
     try:
-        # This needs to be done with the two methods, each checks something
         newUser.full_clean(validate_unique=True)
     except ValidationError as ve:
         return answerJsonValidation(ve)
@@ -302,8 +302,8 @@ def userLogin(request):
     for oldSession in Session.objects.filter(user=user):
         oldSession.delete()
 
-    # Creating the session with an expireation time of
-    expiration = datetime.now() + timedelta(days=1)
+    # Creating the session with an expiration time of one day.
+    expiration = datetime.datetime.now() + datetime.timedelta(days=1)
     session = Session(user=user, expiration=expiration)
     session.save()
 
@@ -369,7 +369,7 @@ def alertGetlist(request):
 
     # Getting JSON Data
     try:
-        requiredKeys = ["session", "lat", "long"]
+        requiredKeys = ["session", "lat", "long", "radius"]
         json_data = doInitialChecks(neededValues=requiredKeys, request=request)
     except RestMethodInitFail as fail:
         return fail.response
@@ -380,7 +380,42 @@ def alertGetlist(request):
     except SessionCheckFail as fail:
         return fail.response
 
-    return HttpResponse("alertGetlist")
+    # Get the data
+    latitude = json_data["lat"]
+    longitude = json_data["long"]
+    radius = float(json_data["radius"])
+    # Update the current position of the user while we can.
+    user.updatePosition(longitude, latitude)
+    user.radius = radius
+    user.save()
+
+    # Create the current user point
+    point = GEOSGeometry('SRID=4326;POINT({} {})'.format(latitude, longitude))
+    # Only get the alerts that are actives and in the radius
+    activeAlerts = list(Alert.objects.filter(isActive=True).all())
+    distantAlerts = [a for a in activeAlerts if a.distance(point) < user.radius]
+
+    # Make and return the corresponding dictionary
+    alerts = [{"id": str(a.id)} for a in distantAlerts]
+    return genJsonResponse(json.dumps(alerts))
+
+
+def jsonAlertRepr(alert, user):
+    """ Create a dictionary that contains all the required data to represents an Alert.
+
+    :param alert: the alert to dump.
+    :param user: the requiring user, used in the distance computation.
+    :return: a dictionary that contains the required data, ready to be dumped into json.
+    """
+    return {
+        "id": str(alert.id),
+        "name": alert.name,
+        "author": "{} {}".format(alert.author.first_name, alert.author.last_name),
+        "long": str(alert.alert_position.x),
+        "lat": str(alert.alert_position.y),
+        "score": str(alert.getScore()),
+        "distance": alert.distance(user.last_position)
+    }
 
 
 @csrf_exempt
@@ -405,8 +440,9 @@ def alertGet(request):
     except SessionCheckFail as fail:
         return fail.response
 
-    #TODO Convert to json with the generated score replacing the vote_set
-    return HttpResponse("alertGet")
+    alerts = [t["id"] for t in json_data["alerts"]]
+    alertsData = {identifier: jsonAlertRepr(Alert.objects.get(id=identifier), user) for identifier in alerts}
+    return genJsonResponse(json.dumps(alertsData))
 
 
 @csrf_exempt
@@ -431,11 +467,15 @@ def alertAdd(request):
     except SessionCheckFail as fail:
         return fail.response
 
-    # Creating the alert
+    # Creating the alert and checking validity.
     alert = Alert(author=user, position=Point(float(json_data['long']), float(json_data['lat'])))
+    try:
+        alert.full_clean(validate_unique=True)
+    except ValidationError as ve:
+        return answerJsonValidation(ve)
     alert.save()
 
-    #TODO Do something with GCM Here
+    # TODO Do something with GCM Here
 
     return answerAlertId(alert.id)
 
@@ -462,7 +502,7 @@ def alertClose(request):
     except SessionCheckFail as fail:
         return fail.response
 
-    # Closing the alert, getting it from the ones that are realted to this user
+    # Closing the alert, getting it from the ones that are related to this user
     try:
         alert = user.alert_set.filter(id=uuid.UUID(json_data["alert"])).get()
         alert.isActive = False
@@ -470,7 +510,7 @@ def alertClose(request):
     except Alert.DoesNotExist:
         return answerAlertNotFound()
 
-    #TODO DO something with GCM Here
+    # TODO DO something with GCM Here
     return answerSuccess(True)
 
 
