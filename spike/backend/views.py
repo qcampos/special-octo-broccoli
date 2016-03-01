@@ -369,7 +369,7 @@ def alertGetlist(request):
 
     # Getting JSON Data
     try:
-        requiredKeys = ["session", "lat", "long"]
+        requiredKeys = ["session", "lat", "long", "radius"]
         json_data = doInitialChecks(neededValues=requiredKeys, request=request)
     except RestMethodInitFail as fail:
         return fail.response
