@@ -1,5 +1,5 @@
 from django.contrib import admin
-from backend.models import User, Alert, Session
+from backend.models import User, Alert, Session, Vote
 
 
 # Register your models here.
@@ -7,20 +7,27 @@ from backend.models import User, Alert, Session
 
 class UserAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields': ['pin']}),
-        ('User data', {'fields': ['first_name', 'last_name', 'phone']}),
+        (None, {'fields': ['first_name', 'last_name', 'mail', 'phone']}),
+        ('User data', {'fields': ['pin']}),
     ]
-    list_display = ['pin', 'first_name', 'last_name', 'id']
-    search_fields = ['pin', 'first_name', 'last_name']
+    list_display = ['id', 'mail', 'first_name', 'last_name']
+    search_fields = ['mail', 'first_name', 'last_name']
+
+
+class VoteInline(admin.TabularInline):
+    model = Vote
+    extra = 1
 
 
 class AlertAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None, {'fields': ['name', 'author']}),
+        (None, {'fields': ['name', 'author', 'isActive']}),
         ('Position', {'fields': ['position'], 'classes': ['collapse']}),
     ]
-    list_display = ['name', 'author', 'position', 'id']
+    list_display = ['id', 'name', 'author', 'getPosition', 'getTotalNote', 'isActive']
     search_fields = ['name', 'author']
+    list_filter = ['isActive']
+    inlines = [VoteInline]
 
 
 class SessionAdmin(admin.ModelAdmin):
@@ -28,7 +35,7 @@ class SessionAdmin(admin.ModelAdmin):
         (None, {'fields': ['id', 'user', 'expiration']})
     ]
     list_display = ['id', 'user', 'expiration']
-    search_fields = ['id']
+    search_fields = ['id', 'user']
 
 
 admin.site.register(User, UserAdmin)
