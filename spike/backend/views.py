@@ -33,7 +33,7 @@ def answerMalformedJson():
     """ Return a valid http answer to inform the user that the received json was malformed, with the right error code
     and a potentially more specific message.
 
-    :return: the HttpReponse object fully initialized.
+    :return: the HttpResponse object fully initialized.
     """
     return genJsonResponse(json.dumps({"error": {"code": APP_MALFORMED_JSON, "message": "Malformed JSON"}}),
                            return_code=HTTP_BAD_REQUEST)
@@ -43,7 +43,7 @@ def answerIncompleteJson():
     """ Return a valid http answer to inform the user that the received json was missing some keys, with the right error
      code and a potentially more specific message.
 
-    :return: the HttpReponse object fully initialized.
+    :return: the HttpResponse object fully initialized.
     """
     return genJsonResponse(json.dumps({"error": {"code": APP_MISSING_DATA, "message": "Incomplete JSON"}}),
                            return_code=HTTP_BAD_REQUEST)
@@ -128,9 +128,9 @@ def answerAlertNotFound():
 
 
 def answerAlreadyVoted():
-    """ Return a valid Http answer to inform the user that the given alert coudn't be found
+    """ Return a valid Http answer to inform the user that the given alert couldn't be found
 
-    :return: the HttpResponse obejct fully initialized
+    :return: the HttpResponse object fully initialized
     """
     return genJsonResponse(json.dumps({"error": {"code": APP_ALERT_ALREADY_VOTED, "message": "You already voted"}}),
                            return_code=HTTP_BAD_REQUEST)
