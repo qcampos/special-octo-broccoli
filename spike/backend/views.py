@@ -6,8 +6,10 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 from functools import reduce
 from datetime import datetime, timedelta
+from django.contrib.gis.geos import Point
+import uuid
 
-from backend.models import User, Alert, Session
+from backend.models import User, Alert, Session, Vote
 
 # HTTP Return Codes
 HTTP_OK = 200
@@ -22,6 +24,8 @@ APP_INVALID_DATA = 3
 APP_LOGIN_FAILED = 4
 APP_SESSION_EXPIRED = 5
 APP_SESSION_NOT_FOUND = 6
+APP_ALERT_NOT_FOUND = 7
+APP_ALERT_ALREADY_VOTED = 8
 
 
 # Classic answers
@@ -92,7 +96,8 @@ def answerSessionNotFound():
 
     :return: the HttpResponse object fully initialized
     """
-    return genJsonResponse(json.dumps({"error": {"code": APP_SESSION_NOT_FOUND, "message": "Session not found"}}))
+    return genJsonResponse(json.dumps({"error": {"code": APP_SESSION_NOT_FOUND, "message": "Session not found"}}),
+                           return_code=HTTP_UNAUTHORISED)
 
 
 def answerSessionExpired():
@@ -100,7 +105,35 @@ def answerSessionExpired():
 
     :return: the HttpResponse object fully initialized
     """
-    return genJsonResponse(json.dumps({"error": {"code": APP_SESSION_EXPIRED, "message": "Session expired"}}))
+    return genJsonResponse(json.dumps({"error": {"code": APP_SESSION_EXPIRED, "message": "Session expired"}}),
+                           return_code=HTTP_UNAUTHORISED)
+
+
+def answerAlertId(alertId):
+    """ Return a valid HTTP answer to inform the user of the fact that he successfully created an alert
+
+    :param alertId: the newly created alert id
+    :return: the HttpResponse object fully initialized
+    """
+    return genJsonResponse(json.dumps({"id": str(alertId)}))
+
+
+def answerAlertNotFound():
+    """ Return a valid Http answer to inform the user that the given alert couldn't be found
+
+    :return: the HttpResponse object fully initialized
+    """
+    return genJsonResponse(json.dumps({"error": {"code": APP_ALERT_NOT_FOUND, "message": "Alert not Found"}}),
+                           return_code=HTTP_BAD_REQUEST)
+
+
+def answerAlreadyVoted():
+    """ Return a valid Http answer to inform the user that the given alert coudn't be found
+
+    :return: the HttpResponse obejct fully initialized
+    """
+    return genJsonResponse(json.dumps({"error": {"code": APP_ALERT_ALREADY_VOTED, "message": "You already voted"}}),
+                           return_code=HTTP_BAD_REQUEST)
 
 
 def genJsonResponse(json_string, return_code=200):
@@ -333,6 +366,20 @@ def alertGetlist(request):
     :param request: the request that contains values.
     :return: the http response to the client.
     """
+
+    # Getting JSON Data
+    try:
+        requiredKeys = ["session", "lat", "long"]
+        json_data = doInitialChecks(neededValues=requiredKeys, request=request)
+    except RestMethodInitFail as fail:
+        return fail.response
+
+    # Checking session and getting related user
+    try:
+        user = checkSession(json_data['session'])
+    except SessionCheckFail as fail:
+        return fail.response
+
     return HttpResponse("alertGetlist")
 
 
@@ -344,6 +391,21 @@ def alertGet(request):
     :param request: the request that contains values.
     :return: the http response to the client.
     """
+
+    # Getting JSON Data
+    try:
+        requiredKeys = ["session", "alerts"]
+        json_data = doInitialChecks(neededValues=requiredKeys, request=request)
+    except RestMethodInitFail as fail:
+        return fail.response
+
+    # Checking session and getting related user
+    try:
+        user = checkSession(json_data['session'])
+    except SessionCheckFail as fail:
+        return fail.response
+
+    #TODO Convert to json with the generated score replacing the vote_set
     return HttpResponse("alertGet")
 
 
@@ -355,7 +417,27 @@ def alertAdd(request):
     :param request: the request that contains values.
     :return: the http response to the client.
     """
-    return HttpResponse("alertAdd")
+
+    # Getting JSON Data
+    try:
+        requiredKeys = ["session", "long", "lat"]
+        json_data = doInitialChecks(neededValues=requiredKeys, request=request)
+    except RestMethodInitFail as fail:
+        return fail.response
+
+    # Checking session and getting related user
+    try:
+        user = checkSession(json_data['session'])
+    except SessionCheckFail as fail:
+        return fail.response
+
+    # Creating the alert
+    alert = Alert(author=user, position=Point(float(json_data['long']), float(json_data['lat'])))
+    alert.save()
+
+    #TODO Do something with GCM Here
+
+    return answerAlertId(alert.id)
 
 
 @csrf_exempt
@@ -366,7 +448,30 @@ def alertClose(request):
     :param request: the request that contains values.
     :return: the http response to the client.
     """
-    return HttpResponse("alertClose")
+
+    # Getting JSON Data
+    try:
+        requiredKeys = ["session", "alert"]
+        json_data = doInitialChecks(neededValues=requiredKeys, request=request)
+    except RestMethodInitFail as fail:
+        return fail.response
+
+    # Checking session and getting related user
+    try:
+        user = checkSession(json_data['session'])
+    except SessionCheckFail as fail:
+        return fail.response
+
+    # Closing the alert, getting it from the ones that are realted to this user
+    try:
+        alert = user.alert_set.filter(id=uuid.UUID(json_data["alert"])).get()
+        alert.isActive = False
+        alert.save()
+    except Alert.DoesNotExist:
+        return answerAlertNotFound()
+
+    #TODO DO something with GCM Here
+    return answerSuccess(True)
 
 
 @csrf_exempt
@@ -378,4 +483,30 @@ def alertValidate(request):
     :return:  the HTTP Response
     """
 
-    return HttpResponse("alertValidate")
+    # Getting JSON Data
+    try:
+        requiredKeys = ["session", "alert", "validate"]
+        json_data = doInitialChecks(neededValues=requiredKeys, request=request)
+    except RestMethodInitFail as fail:
+        return fail.response
+
+    # Checking session and getting related user
+    try:
+        user = checkSession(json_data['session'])
+    except SessionCheckFail as fail:
+        return fail.response
+
+    # Getting the alert
+    try:
+        alert = Alert.objects.filter(id=uuid.UUID(json_data["alert"])).get()
+    except Alert.DoesNotExist:
+        return answerAlertNotFound()
+
+    # Checking if an vote has already been done
+    if len(alert.vote_set.filter(user=user)) > 0:
+        return answerAlreadyVoted()
+
+    vote = Vote(user=user, value=json_data['validate'], alert=alert)
+    vote.save()
+
+    return answerSuccess(True)

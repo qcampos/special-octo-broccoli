@@ -3,6 +3,7 @@ import uuid
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
 from django.core import validators
+from functools import reduce
 
 
 class User(models.Model):
@@ -26,7 +27,6 @@ class Alert(models.Model):
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     author = models.ForeignKey('User', on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)
 
     #  Srid 4326 is compatible with longitude and latitude provided by Google's API
     position = models.PointField(srid=4326)
@@ -44,6 +44,16 @@ class Alert(models.Model):
         pnt = GEOSGeometry('SRID=4326;POINT({} {})'.format(self.position.x, self.position.y))
         pnt2 = GEOSGeometry('SRID=4326;POINT({} {})'.format(position.x, position.y))
         return pnt.distance(pnt2) * 100
+
+    def getScore(self):
+        """ Returns the actual score for this alert given it's votes
+
+        :return: an int matching this alert's score
+        """
+        if len(self.vote_set) == 0:
+            return 0
+        else:
+            return reduce(lambda x, y: x + y, map(lambda x: 1 if x.value else -1))
 
     def __str__(self):
         return "{} by {} at ({},{})".format(self.name, self.author, self.position.x, self.position.y)

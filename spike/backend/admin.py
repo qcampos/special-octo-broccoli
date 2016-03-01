@@ -19,7 +19,7 @@ class AlertAdmin(admin.ModelAdmin):
         (None, {'fields': ['name', 'author']}),
         ('Position', {'fields': ['position'], 'classes': ['collapse']}),
     ]
-    list_display = ['name', 'author', 'position', 'id']
+    list_display = ['author', 'position', 'id']
     search_fields = ['name', 'author']
 
 
