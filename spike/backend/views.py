@@ -13,6 +13,7 @@ import urllib.request
 import urllib.error
 import urllib.response
 import logging
+import threading
 
 from backend.models import User, Alert, Session, Vote
 
@@ -254,18 +255,38 @@ def GCMPostToTopic(topic, data):
         "data": data,
         "priority": "high"
     }
-    req = urllib.request.Request(url=GCM_API_URL, data=json.dumps(data))
+    req = urllib.request.Request(url=GCM_API_URL, data=json.dumps(data), headers=headers)
 
     try:
         urllib.request.urlopen(req)
     except urllib.error.HTTPError as err:
-        logging.error("HTTP error code {} received when sending messing to GCM".format(err.code))
+        logging.error("HTTP error code {} received when sending messing to topic {}".format(err.code, topic))
         return False
     except urllib.error.URLError as err:
         logging.error("The url {} couldn't be reached".format(GCM_API_URL))
         return False
-
+    logging.info("Successfully sending GCM message to {}".format(topic))
     return True
+
+
+def notifyNewAlert(al):
+    """ Send a notification to every user that is near the given Alert
+
+    :param al: the alert to notify
+    """
+    users = [usr for usr in User.objects.filter(last_position__isnull=False)
+             if al.distance(usr.last_position, usr.radius)]
+    logging.info("Notifying {} users for the alert {}".format(users.count(), al))
+
+    data = {
+        "id": str(al.id),
+        "lat": al.alert_position.x,
+        "long": al.alert_position.y
+    }
+
+    for user in users:
+        topic = "user-{}".format(str(user.id))
+        GCMPostToTopic(topic,data)
 
 
 ##############################
@@ -343,7 +364,8 @@ def userLogin(request):
         oldSession.delete()
 
     # Creating the session with an expiration time of one day.
-    expiration = datetime.datetime.now() + datetime.timedelta(days=1)
+    expiration = timezone.make_aware(datetime.datetime.now() + datetime.timedelta(days=1),
+                                      timezone.get_default_timezone())
     session = Session(user=user, expiration=expiration)
     session.save()
 
@@ -515,8 +537,8 @@ def alertAdd(request):
         return answerJsonValidation(ve)
     alert.save()
 
-    # TODO Do something with GCM Here
-
+    # Opening a new thread to notify users
+    threading.Thread(target=notifyNewAlert, args=[alert], daemon=False).start()
     return answerAlertId(alert.id)
 
 
@@ -550,7 +572,15 @@ def alertClose(request):
     except Alert.DoesNotExist:
         return answerAlertNotFound()
 
-    # TODO DO something with GCM Here
+    # Sending notification that the alert is now closed
+    topic = "alert-{}".format(alert.id)
+    data = {
+        "isActive": False
+    }
+
+    # Opening a new thread to notify users
+    threading.Thread(target=GCMPostToTopic, args=[topic, data], daemon=False).start()
+
     return answerSuccess(True)
 
 
