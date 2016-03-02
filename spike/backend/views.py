@@ -238,7 +238,7 @@ def checkSession(sessionId):
 ############################################################
 
 # TODO Move to settings?
-GCM_API_KEY = "AIzaSyCA0nYK3waZc5VIeCbCHlE  tw8NBpjOzzbI"
+GCM_API_KEY = "AIzaSyCA0nYK3waZc5VIeCbCHlEtw8NBpjOzzbI"
 GCM_API_URL = "https://gcm-http.googleapis.com/gcm/send"
 
 
@@ -249,13 +249,18 @@ def GCMPostToTopic(topic, data):
     :param data: a dictionnary containg the data
     :return: True if the message could be sent, False if not (and the reason is logged
     """
-    headers = {'Authorization': "key:{}".format(GCM_API_KEY), 'Content-Type': 'application/json'}
     data = {
         "to": "/topic/{}".format(topic),
         "data": data,
         "priority": "high"
     }
-    req = urllib.request.Request(url=GCM_API_URL, data=json.dumps(data), headers=headers)
+
+    data = json.dumps(data).encode('utf-8')
+    headers = {
+        'Authorization': "key={}".format(GCM_API_KEY),
+        'Content-Type': 'application/json',
+    }
+    req = urllib.request.Request(url=GCM_API_URL, data=data, headers=headers)
 
     try:
         urllib.request.urlopen(req)
@@ -275,8 +280,8 @@ def notifyNewAlert(al):
     :param al: the alert to notify
     """
     users = [usr for usr in User.objects.filter(last_position__isnull=False)
-             if al.distance(usr.last_position, usr.radius)]
-    logging.info("Notifying {} users for the alert {}".format(users.count(), al))
+             if al.distance(usr.last_position) < usr.radius]
+    logging.info("Notifying {} users for the alert {}".format(len(users), al))
 
     data = {
         "id": str(al.id),
@@ -518,7 +523,7 @@ def alertAdd(request):
 
     # Getting JSON Data
     try:
-        requiredKeys = ["session", "long", "lat"]
+        requiredKeys = ["session", "long", "lat", "name"]
         json_data = doInitialChecks(neededValues=requiredKeys, request=request)
     except RestMethodInitFail as fail:
         return fail.response
@@ -530,7 +535,7 @@ def alertAdd(request):
         return fail.response
 
     # Creating the alert and checking validity.
-    alert = Alert(author=user, position=Point(float(json_data['long']), float(json_data['lat'])))
+    alert = Alert(author=user, name=json_data["name"], alert_position=Point(float(json_data['long']), float(json_data['lat'])))
     try:
         alert.full_clean(validate_unique=True)
     except ValidationError as ve:
