@@ -1,5 +1,6 @@
 from django.contrib import admin
 from backend.models import User, Alert, Session, Vote, PositionHistory
+from django.contrib.admin.models import LogEntry
 
 
 # Register your models here.
@@ -26,8 +27,9 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ['mail', 'first_name', 'last_name']
 
     def view_position(self, obj):
-        return "({}, {})".format(obj.last_position.x, obj.last_position.y)
-
+        if obj.last_position:
+            return "({}, {})".format(obj.last_position.x, obj.last_position.y)
+        return ""
     view_position.short_description = "Position"
 
 
@@ -70,3 +72,8 @@ class PositionHistoryAdmin(admin.ModelAdmin):
         return "({}, {})".format(obj.position.x, obj.position.y)
 
     view_position.short_description = "Position"
+
+
+@admin.register(LogEntry)
+class LogEntryAdmin(admin.ModelAdmin):
+    pass
