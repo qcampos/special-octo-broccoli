@@ -68,11 +68,12 @@ public interface FragmentReceiver {
         abstract void performNetworkRequest(HomeActivity homeActivity, String... params);
 
         /**
-         * The HomeActivity instance allows the view fragment to notify of changes
-         * accordingly to the
+         * Processes network results placed into the given intent.
+         * The HomeActivity instance allows the view fragment to notify changes to this
+         * class.
          *
-         * @param homeActivity
-         * @param intent
+         * @param homeActivity enclosing activity to notify of changes if needed (like changing screen)
+         * @param intent       The NetworkService result intent to extract.
          */
         abstract void processNetworkResult(HomeActivity homeActivity, Intent intent);
 
@@ -103,6 +104,10 @@ public interface FragmentReceiver {
             state = FragmentState.WAITING_NETWORK_RESULT;
             disableFields();
             performNetworkRequest(homeActivity, params);
+        }
+
+        HomeActivity getHomeActivity() {
+            return homeActivity;
         }
 
         @Override

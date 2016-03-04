@@ -20,7 +20,6 @@ import notification_security.upem.fr.securitynotification.network.NetworkService
 /**
  * Home activity. Performs life cycle control and binds other fragments.
  * TODO tell the list of fragments handled in HomeActivity.
- * TODO Try to switch between fragment to show.
  */
 public class HomeActivity extends AppCompatActivity {
 
@@ -61,7 +60,6 @@ public class HomeActivity extends AppCompatActivity {
         NetworkService.startChangeAccessAction(this, false);
     }
 
-
     private void registerNetworkServiceReceiver() {
         IntentFilter filter = createHomeFilters();
         LocalBroadcastManager.getInstance(this).registerReceiver(serviceReceiver, filter);
@@ -70,7 +68,6 @@ public class HomeActivity extends AppCompatActivity {
     private void unregisterNetworkServiceReceiver() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(serviceReceiver);
     }
-
 
     @NonNull
     public static IntentFilter createHomeFilters() {

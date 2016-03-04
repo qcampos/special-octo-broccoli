@@ -9,17 +9,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import notification_security.upem.fr.securitynotification.R;
+import notification_security.upem.fr.securitynotification.home.FragmentReceiver.BaseFragmentReceiver;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link HomeIdleFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link HomeIdleFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Fragment handling home in idle state, logic.
  */
-public class HomeIdleFragment extends Fragment implements FragmentReceiver {
+public class HomeIdleFragment extends BaseFragmentReceiver {
 
     @Nullable
     @Override
@@ -30,9 +26,27 @@ public class HomeIdleFragment extends Fragment implements FragmentReceiver {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        // Update after the activity has finished to load itself.
-        // Set adapter, get view by ids...
-        // getActivity and so on.
+
+    }
+
+    @Override
+    void performNetworkRequest(HomeActivity homeActivity, String... params) {
+
+    }
+
+    @Override
+    void processNetworkResult(HomeActivity homeActivity, Intent intent) {
+
+    }
+
+    @Override
+    void disableFields() {
+
+    }
+
+    @Override
+    void enableFields() {
+
     }
 
     @Override

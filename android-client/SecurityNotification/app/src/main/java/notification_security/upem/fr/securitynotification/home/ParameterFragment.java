@@ -9,21 +9,15 @@ import android.view.ViewGroup;
 
 import notification_security.upem.fr.securitynotification.R;
 
-
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ParameterFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link ParameterFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Fragment handling parameter logic.
  */
 public class ParameterFragment extends Fragment {
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_parameter, container);
+        return inflater.inflate(R.layout.fragment_parameter, container, false);
     }
 
     @Override

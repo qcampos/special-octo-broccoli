@@ -20,7 +20,7 @@ import notification_security.upem.fr.securitynotification.network.NetworkService
 import static notification_security.upem.fr.securitynotification.ViewUtilities.showShortToast;
 
 /**
- * Fragments managing
+ * Fragment handling Connection logic.
  */
 public class ConnectionFragment extends BaseFragmentReceiver {
 
@@ -112,7 +112,12 @@ public class ConnectionFragment extends BaseFragmentReceiver {
      */
     private void setClickListeners() {
         setConnectButtonListener();
-        // TODO setTvNewAccountListener()
+        tvNewAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getHomeActivity().showFragment(new SignUpFragment());
+            }
+        });
     }
 
     /**
