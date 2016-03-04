@@ -18,21 +18,21 @@
             android:text="Entrez votre code PIN pour lancer l'application." />
 
         <EditText
-            android:id="@+id/etLogin"
+            android:id="@+id/connection_etLogin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="100px"
             android:hint="Numéro" />
 
         <EditText
-            android:id="@+id/etPin"
+            android:id="@+id/connection_etPin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="30px"
             android:hint="PIN" />
 
         <Button
-            android:id="@+id/btConnect"
+            android:id="@+id/connection_btConnect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -41,12 +41,12 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/tvNewAccount"
+        android:id="@+id/connection_tvNewAccount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="70px"
         android:gravity="center"
         android:text="Créer un nouveau compte"
-        android:textColor="@color/error_color"/>
+        android:textColor="@color/error_color" />
 </RelativeLayout>
