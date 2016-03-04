@@ -94,8 +94,9 @@ public interface FragmentReceiver {
 
         /**
          * Requests a new action on the NetworkService with the given params.
-         * If the current instance is in the right states, it will call performNetworkRequest
-         * with the given params. It will not if it is already in WAITING_NETWORK_RESULT state.
+         * If the current instance is in the right network states, it will call performNetworkRequest
+         * with params. It will not if the current BaseFragmentReceiver is already in
+         * WAITING_NETWORK_RESULT state.
          */
         final public void requestNetworkAction(String... params) {
             // Guarding the request of multiple requests (sanity check).
@@ -105,10 +106,6 @@ public interface FragmentReceiver {
             state = FragmentState.WAITING_NETWORK_RESULT;
             disableFields();
             performNetworkRequest(homeActivity, params);
-        }
-
-        HomeActivity getHomeActivity() {
-            return homeActivity;
         }
 
         @Override
@@ -139,6 +136,10 @@ public interface FragmentReceiver {
         void stopWaitingNetworkResult() {
             state = FragmentState.IDLE;
             enableFields();
+        }
+
+        HomeActivity getHomeActivity() {
+            return homeActivity;
         }
     }
 }

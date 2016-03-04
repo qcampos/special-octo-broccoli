@@ -36,6 +36,10 @@ public class NetworkService extends IntentService {
     private static final String ACTION_ADD_ALERT = "fr.upem.securitynotification.network.action.ADD_ALERT";
     public static final String ACTION_ADD_ALERT_RES = "fr.upem.securitynotification.network.action.ADD_ALERT_RES";
     /*_______ Make your extras for the factory _______*/
+    // Add Alert constants.
+    private static final String ACTION_STOP_ALERT = "fr.upem.securitynotification.network.action.STOP_ALERT";
+    public static final String ACTION_STOP_ALERT_RES = "fr.upem.securitynotification.network.action.STOP_ALERT_RES";
+    /*_______ Make your extras for the factory _______*/
 
 
     private boolean accessActivityDirectly = false;
@@ -105,6 +109,19 @@ public class NetworkService extends IntentService {
         context.startService(intent);
     }
 
+    /**
+     * Starts this service to perform Stop Alert Action with the given parameters.
+     * If the service is already performing a task ths action will be queued.
+     *
+     * @see IntentService
+     */
+    public static void startStopAlertAction(Context context) {
+        Intent intent = new Intent(context, NetworkService.class);
+        intent.setAction(ACTION_STOP_ALERT);
+        /* TODO intent.putExtra(EXTRA_CONNECT_LOGGING, logging); */
+        context.startService(intent);
+    }
+
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
@@ -119,6 +136,7 @@ public class NetworkService extends IntentService {
                 // All next actions are grouped because for the moment we only want to receive true/false
                 // values in the view, but it will be separated.
                 case ACTION_ADD_ALERT:
+                case ACTION_STOP_ALERT:
                 case ACTION_CONNECT:
                 case ACTION_SIGNUP:
 

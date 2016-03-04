@@ -7,7 +7,7 @@ import android.view.MenuItem;
 
 import notification_security.upem.fr.securitynotification.R;
 
-public class UrgenceMapActivity extends AppCompatActivity {
+public class UrgencyMapActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

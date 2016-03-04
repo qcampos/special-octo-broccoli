@@ -49,7 +49,6 @@ public class ConnectionFragment extends BaseFragmentReceiver {
         setClickListeners();
     }
 
-
     @Override
     public void performNetworkRequest(HomeActivity homeActivity, String... params) {
         String login = params[0];
@@ -67,7 +66,7 @@ public class ConnectionFragment extends BaseFragmentReceiver {
         boolean result = intent.getBooleanExtra(NetworkService.EXTRA_RES, false);
         // Incorrect informations.
         if (!result) {
-            showShortToast(homeActivity, "Informations incorrectes");
+            showShortToast(homeActivity, "Informations incorrects");
             stopWaitingNetworkResult();
             return;
         }
@@ -169,5 +168,4 @@ public class ConnectionFragment extends BaseFragmentReceiver {
         }
         return true;
     }
-
 }

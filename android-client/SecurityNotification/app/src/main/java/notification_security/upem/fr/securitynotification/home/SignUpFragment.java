@@ -58,7 +58,7 @@ public class SignUpFragment extends BaseFragmentReceiver {
         boolean result = intent.getBooleanExtra(NetworkService.EXTRA_RES, false);
         // Incorrect informations.
         if (!result) {
-            showShortToast(homeActivity, "Informations incorrectes");
+            showShortToast(homeActivity, "Informations incorrects");
             stopWaitingNetworkResult();
             return;
         }

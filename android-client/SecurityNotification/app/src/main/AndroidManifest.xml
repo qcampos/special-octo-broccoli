@@ -24,7 +24,7 @@
         </receiver>
 
         <activity
-            android:name=".map.UrgenceMapActivity"
+            android:name=".map.UrgencyMapActivity"
             android:label="@string/title_activity_urgence_map" >
         </activity>
     </application>

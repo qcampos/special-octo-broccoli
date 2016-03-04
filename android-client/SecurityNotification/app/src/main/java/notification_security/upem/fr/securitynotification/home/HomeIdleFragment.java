@@ -13,7 +13,7 @@ import android.widget.Button;
 import notification_security.upem.fr.securitynotification.R;
 import notification_security.upem.fr.securitynotification.geolocalisation.Position;
 import notification_security.upem.fr.securitynotification.home.FragmentReceiver.BaseFragmentReceiver;
-import notification_security.upem.fr.securitynotification.map.UrgenceMapActivity;
+import notification_security.upem.fr.securitynotification.map.UrgencyMapActivity;
 import notification_security.upem.fr.securitynotification.network.NetworkService;
 
 import static notification_security.upem.fr.securitynotification.ViewUtilities.showShortToast;
@@ -33,7 +33,7 @@ public class HomeIdleFragment extends BaseFragmentReceiver {
     // Views.
     private Button btAlert;
     private Button btParameter;
-    private Button btUrgenceMap;
+    private Button btUrgencyMap;
 
     private int count = CLICK_NUMBER;
 
@@ -74,7 +74,7 @@ public class HomeIdleFragment extends BaseFragmentReceiver {
     @Override
     void disableFields() {
         btAlert.setEnabled(false);
-        btUrgenceMap.setEnabled(false);
+        btUrgencyMap.setEnabled(false);
         btParameter.setEnabled(false);
         btAlert.setText("ÉMISSION DE L'URGENCE\n...");
     }
@@ -82,10 +82,10 @@ public class HomeIdleFragment extends BaseFragmentReceiver {
     @Override
     void enableFields() {
         btAlert.setEnabled(true);
-        btUrgenceMap.setEnabled(true);
+        btUrgencyMap.setEnabled(true);
         btParameter.setEnabled(true);
         count = CLICK_NUMBER;
-        updateAlerteCount();
+        updateAlertCount();
     }
 
     @Override
@@ -97,7 +97,7 @@ public class HomeIdleFragment extends BaseFragmentReceiver {
         View view = getView();
         if (view != null) {
             btAlert = (Button) view.findViewById(R.id.home_idle_btAlert);
-            btUrgenceMap = (Button) view.findViewById(R.id.home_idle_btUrgenceMap);
+            btUrgencyMap = (Button) view.findViewById(R.id.home_idle_btUrgencyMap);
             btParameter = (Button) view.findViewById(R.id.home_idle_btSettings);
             return;
         }
@@ -106,7 +106,7 @@ public class HomeIdleFragment extends BaseFragmentReceiver {
 
     private void setClickListeners() {
         setParameterButtonListener();
-        setUrgenceMapButtonListener();
+        setUrgencyMapButtonListener();
         setAlertButtonListener();
     }
 
@@ -119,20 +119,20 @@ public class HomeIdleFragment extends BaseFragmentReceiver {
                     requestNetworkAction();
                     return;
                 }
-                updateAlerteCount();
+                updateAlertCount();
             }
         });
     }
 
-    private void updateAlerteCount() {
+    private void updateAlertCount() {
         btAlert.setText("EMETTRE URGENCE\n(" + count + " clics rapides)");
     }
 
-    private void setUrgenceMapButtonListener() {
-        btUrgenceMap.setOnClickListener(new OnClickListener() {
+    private void setUrgencyMapButtonListener() {
+        btUrgencyMap.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getHomeActivity(), UrgenceMapActivity.class);
+                Intent intent = new Intent(getHomeActivity(), UrgencyMapActivity.class);
                 startActivity(intent);
             }
         });

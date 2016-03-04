@@ -73,6 +73,7 @@ public class HomeActivity extends AppCompatActivity {
         filter.addAction(NetworkService.ACTION_CONNECT_RES);
         filter.addAction(NetworkService.ACTION_SIGNUP_RES);
         filter.addAction(NetworkService.ACTION_ADD_ALERT_RES);
+        filter.addAction(NetworkService.ACTION_STOP_ALERT_RES);
         return filter;
     }
 
