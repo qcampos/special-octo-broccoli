@@ -1,7 +1,6 @@
 package notification_security.upem.fr.securitynotification.home;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -13,6 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import notification_security.upem.fr.securitynotification.home.FragmentReceiver.BaseFragmentReceiver;
 import notification_security.upem.fr.securitynotification.network.ProtocolConstants;
 import notification_security.upem.fr.securitynotification.R;
 import notification_security.upem.fr.securitynotification.network.NetworkService;
@@ -22,7 +22,7 @@ import static notification_security.upem.fr.securitynotification.ViewUtilities.s
 /**
  * Fragments managing
  */
-public class ConnectionFragment extends Fragment implements FragmentReceiver {
+public class ConnectionFragment extends BaseFragmentReceiver {
 
     // The logging TAG.
     private static final String TAG = ConnectionFragment.class.getSimpleName();
@@ -33,28 +33,65 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
     private Button btConnect;
     private TextView tvNewAccount;
 
-    // LifeCycle variables.
-    private HomeActivity parent;
-    private FragmentState state;
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // We have to use false to attache the current fragment to the desired parent.
+        // We have to use false to attache the current fragment to the desired homeActivity.
         return inflater.inflate(R.layout.fragment_connection, container, false);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        // Setting the enclosing HomeActivity.
-        parent = (HomeActivity) getActivity();
-        // Starting this fragment's life in IDLE state.
-        state = FragmentState.IDLE;
         // Getting local views.
         setLocalViews();
         // Setting listeners.
         setClickListeners();
+    }
+
+
+    @Override
+    public void performNetworkRequest(HomeActivity homeActivity, String... params) {
+        String login = params[0];
+        String pin = params[1];
+        NetworkService.startConnectAction(homeActivity, login, pin);
+    }
+
+    @Override
+    public String getFilteredAction() {
+        return NetworkService.ACTION_CONNECT_RES;
+    }
+
+    @Override
+    void processNetworkResult(HomeActivity homeActivity, Intent intent) {
+        boolean result = intent.getBooleanExtra(NetworkService.EXTRA_RES, false);
+        // Incorrect informations.
+        if (!result) {
+            showShortToast(homeActivity, "Informations incorrectes");
+            stopWaitingNetworkResult();
+            return;
+        }
+        // Correct informations. We can pass to the HomeIdleFragment.
+        homeActivity.showFragment(new HomeIdleFragment());
+    }
+
+    @Override
+    void disableFields() {
+        etPin.setEnabled(false);
+        etLogin.setEnabled(false);
+        tvNewAccount.setEnabled(false);
+        btConnect.setEnabled(false);
+        btConnect.setText("CONNEXION...");
+    }
+
+
+    @Override
+    void enableFields() {
+        etPin.setEnabled(true);
+        etLogin.setEnabled(true);
+        tvNewAccount.setEnabled(true);
+        btConnect.setEnabled(true);
+        btConnect.setText("SE CONNECTER");
     }
 
 
@@ -75,6 +112,7 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
      */
     private void setClickListeners() {
         setConnectButtonListener();
+        // TODO setTvNewAccountListener()
     }
 
     /**
@@ -89,67 +127,11 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
                 String pin = etPin.getText().toString().trim();
                 Log.v(TAG, "Connect button onClick (logging : " + logging + " - pin : " + pin + ")");
                 // Checking if fields are correct, aborting if not.
-                if (parseTFInputs(logging, pin)) return;
+                if (validateTFInputs(logging, pin)) return;
                 // Now requesting the connection and updating the button accordingly.
-                startConnectionState(logging, pin);
+                requestNetworkAction(logging, pin);
             }
         });
-    }
-
-    /**
-     * Performs a connection request on the NetworkService
-     * with the given parameters.
-     * It disables the connect button and put the current fragment
-     * in a WAITING_NETWORK_RESULT state.
-     */
-    private void requestConnection(String logging, String pin) {
-        NetworkService.startConnectAction(getActivity(), logging, pin);
-    }
-
-    /**
-     * Starts a connection request with the given parameters. It updates the view accordingly.
-     */
-    private void startConnectionState(String... fields) {
-        // Guarding the request.
-        if (state == FragmentState.WAITING_NETWORK_RESULT) {
-            return;
-        }
-        state = FragmentState.WAITING_NETWORK_RESULT;
-        String login = fields[0];
-        String pin = fields[1];
-        // Requesting the connection to the network.
-        requestConnection(login, pin);
-        // Setting button states.
-        disableFields();
-    }
-
-    private void stopConnectionState() {
-        state = FragmentState.IDLE;
-        enableFields();
-    }
-
-
-    @Override
-    public String getFilteredAction() {
-        return NetworkService.ACTION_CONNECT_RES;
-    }
-
-    @Override
-    public void onReceiveNetworkIntent(Intent intent) {
-        if (state != FragmentState.WAITING_NETWORK_RESULT) {
-            Log.e(TAG, "onReceiveNetworkIntent - Receiving not waited intent.");
-            return;
-        }
-        Log.d(TAG, "onReceiveNetworkIntent - receiving waited intent.");
-        boolean result = intent.getBooleanExtra(NetworkService.EXTRA_RES, false);
-        // Incorrect informations.
-        if (!result) {
-            showShortToast(getActivity(), "Information incorrectes");
-            stopConnectionState();
-            return;
-        }
-        // Correct informations. We can pass to the HomeIdleFragment.
-        parent.showFragment(new HomeIdleFragment());
     }
 
     /**
@@ -158,7 +140,7 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
      *
      * @return true if every fields are valid, false otherwise.
      */
-    private boolean parseTFInputs(String logging, String pin) {
+    private boolean validateTFInputs(String logging, String pin) {
         Activity activity = getActivity();
         if (logging.isEmpty() || pin.isEmpty()) {
             showShortToast(activity, "Veuillez remplir tous les champs");
@@ -172,19 +154,4 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
         return false;
     }
 
-    private void disableFields() {
-        etPin.setEnabled(false);
-        etLogin.setEnabled(false);
-        tvNewAccount.setEnabled(false);
-        btConnect.setEnabled(false);
-        btConnect.setText("CONNEXION...");
-    }
-
-    private void enableFields() {
-        etPin.setEnabled(true);
-        etLogin.setEnabled(true);
-        tvNewAccount.setEnabled(true);
-        btConnect.setEnabled(true);
-        btConnect.setText("SE CONNECTER");
-    }
 }

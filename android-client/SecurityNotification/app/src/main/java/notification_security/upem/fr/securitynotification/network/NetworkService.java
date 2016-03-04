@@ -84,6 +84,11 @@ public class NetworkService extends IntentService {
 
                     // TODO this is the type of answer made when accessActivityDirectly == true.
                     Intent localIntent = new Intent(ACTION_CONNECT_RES);
+                    try {
+                        Thread.sleep(1500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     localIntent.putExtra(EXTRA_RES, true);
                     sendLocalBroadcast(localIntent);
                     break;
