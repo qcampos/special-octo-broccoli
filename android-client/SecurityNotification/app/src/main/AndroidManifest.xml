@@ -20,6 +20,11 @@
             android:name=".HomeActivity"
             android:label="@string/title_activity_home" >
         </activity>
+
+        <service
+            android:name=".network.NetworkService"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>
