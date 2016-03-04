@@ -3,6 +3,7 @@ package notification_security.upem.fr.securitynotification.network;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 /**
@@ -14,12 +15,15 @@ import android.util.Log;
 public class NetworkService extends IntentService {
     // List of ACTION, and their EXTRA constants keys this service can perform.
     private static final String TAG = NetworkService.class.getSimpleName();
-    // Chance access action constants.
+    // Result constant. It is always set in answers' intent.
+    public static final String EXTRA_RES = "fr.upem.securitynotification.network.extra.RES";
+    // Change access constants.
     private static final String ACTION_CHANGE_ACCESS = "fr.upem.securitynotification.network.action.CHANGE_ACCESS";
     public static final String ACTION_CHANGE_ACCESS_RES = "fr.upem.securitynotification.network.action.CHANGE_ACCESS_RES";
     public static final String EXTRA_CHANGE_ACCESS = "fr.upem.securitynotification.network.extra.CHANGE_ACCESS";
-    // Connect action constants.
+    // Connect constants.
     private static final String ACTION_CONNECT = "fr.upem.securitynotification.network.action.CONNECT";
+    public static final String ACTION_CONNECT_RES = "fr.upem.securitynotification.network.action.CONNECT_RES";
     private static final String EXTRA_CONNECT_LOGGING = "fr.upem.securitynotification.network.extra.LOGGING";
     private static final String EXTRA_CONNECT_PIN = "fr.upem.securitynotification.network.extra.PIN";
 
@@ -75,7 +79,13 @@ public class NetworkService extends IntentService {
                     handleActionChangeAccess(isDirect);
                     break;
                 case ACTION_CONNECT:
-                    Log.d(TAG, "handleActionConnect receiving new parameters...");
+                    // TODO call the corresponding handle method.
+                    Log.v(TAG, "handleActionConnect receiving new parameters...");
+
+                    // TODO this is the type of answer made when accessActivityDirectly == true.
+                    Intent localIntent = new Intent(ACTION_CONNECT_RES);
+                    localIntent.putExtra(EXTRA_RES, true);
+                    sendLocalBroadcast(localIntent);
                     break;
                 default:
                     Log.e(TAG, "onHandleIntent error in communication protocol.");
@@ -83,6 +93,7 @@ public class NetworkService extends IntentService {
             }
         }
     }
+
 
     /**
      * Handles the action change access.
@@ -97,4 +108,10 @@ public class NetworkService extends IntentService {
         this.accessActivityDirectly = accessActivityDirectly;
     }
 
+    /**
+     * Sends a local broadcast with the given intent.
+     */
+    private void sendLocalBroadcast(Intent intent) {
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
 }

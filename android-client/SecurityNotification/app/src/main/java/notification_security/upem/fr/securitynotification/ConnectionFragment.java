@@ -116,7 +116,7 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
 
     @Override
     public void onReceiveNetworkIntent(Intent intent) {
-        // TODO discard guard on state.
+        // TODO discard guard on state not receiving.
         Log.d(TAG, "onReceiveNetworkIntent - receiving a response intent.");
     }
 
@@ -143,6 +143,7 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
     private void disableFields() {
         etPin.setEnabled(false);
         etLogging.setEnabled(false);
+        tvNewAccount.setEnabled(false);
         btConnect.setEnabled(false);
         btConnect.setText("CONNEXION...");
     }

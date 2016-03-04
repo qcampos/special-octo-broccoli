@@ -25,6 +25,12 @@
             android:name=".network.NetworkService"
             android:exported="false" >
         </service>
+
+        <receiver
+            android:name=".network.NetworkServiceReceiver"
+            android:enabled="true"
+            android:exported="false" >
+        </receiver>
     </application>
 
 </manifest>
