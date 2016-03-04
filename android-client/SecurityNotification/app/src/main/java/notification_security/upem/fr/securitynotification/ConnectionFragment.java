@@ -61,21 +61,6 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
         tvNewAccount = (TextView) view.findViewById(R.id.connection_tvNewAccount);
     }
 
-    /**
-     * Performs a connection request on the NetworkService
-     * with the given parameters.
-     * It disables the connect button and put the current fragment
-     * in a WAITING_NETWORK_RESULT state.
-     */
-    private void requestConnection(String logging, String pin) {
-        // Guarding the request.
-        if (state == FragmentState.WAITING_NETWORK_RESULT) {
-            return;
-        }
-        btConnect.setEnabled(false);
-        state = FragmentState.WAITING_NETWORK_RESULT;
-        NetworkService.startConnectAction(getActivity(), logging, pin);
-    }
 
     /**
      * Sets the click listener.
@@ -95,27 +80,70 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
                 String logging = etLogging.getText().toString().trim();
                 String pin = etPin.getText().toString().trim();
                 Log.v(TAG, "Connect button onClick (logging : " + logging + " - pin : " + pin + ")");
-                // Checking if fields are correct.
-                Activity activity = getActivity();
-                if (logging.isEmpty() || pin.isEmpty()) {
-                    ViewUtilities.showShortToast(activity, "Veuillez remplir tous les champs");
-                    return;
-                }
-                // Checking the minimal length.
-                if (pin.length() < 4) {
-                    ViewUtilities.showShortToast(activity, "PIN nécessite 4 chiffres");
-                    return;
-                }
-                // Now requesting a connection to the network.
-                requestConnection(logging, pin);
+                // Checking if fields are correct, aborting if not.
+                if (parseTFInputs(logging, pin)) return;
+                // Now requesting the connection and updating the button accordingly.
+                startConnectionState(logging, pin);
             }
         });
     }
 
+    /**
+     * Performs a connection request on the NetworkService
+     * with the given parameters.
+     * It disables the connect button and put the current fragment
+     * in a WAITING_NETWORK_RESULT state.
+     */
+    private void requestConnection(String logging, String pin) {
+        NetworkService.startConnectAction(getActivity(), logging, pin);
+    }
+
+    /**
+     * Starts a connection request with the given parameters. It updates the view accordingly.
+     */
+    private void startConnectionState(String logging, String pin) {
+        // Guarding the request.
+        if (state == FragmentState.WAITING_NETWORK_RESULT) {
+            return;
+        }
+        state = FragmentState.WAITING_NETWORK_RESULT;
+        // Requesting the connection to the network.
+        requestConnection(logging, pin);
+        // Setting button states.
+        disableFields();
+    }
+
 
     @Override
-    public void receiveIntent(Intent intent) {
+    public void onReceiveNetworkIntent(Intent intent) {
         // TODO discard guard on state.
-        Log.d(TAG, "receiveIntent - receiving a response intent.");
+        Log.d(TAG, "onReceiveNetworkIntent - receiving a response intent.");
+    }
+
+    /**
+     * Parses text fields inputs value. Sends toast if any error
+     * are detected.
+     *
+     * @return true if every fields are valid, false otherwise.
+     */
+    private boolean parseTFInputs(String logging, String pin) {
+        Activity activity = getActivity();
+        if (logging.isEmpty() || pin.isEmpty()) {
+            ViewUtilities.showShortToast(activity, "Veuillez remplir tous les champs");
+            return true;
+        }
+        // Checking the minimal length.
+        if (pin.length() < ProtocolConstants.PIN_LENGTH) {
+            ViewUtilities.showShortToast(activity, "PIN nécessite 4 chiffres");
+            return true;
+        }
+        return false;
+    }
+
+    private void disableFields() {
+        etPin.setEnabled(false);
+        etLogging.setEnabled(false);
+        btConnect.setEnabled(false);
+        btConnect.setText("CONNEXION...");
     }
 }

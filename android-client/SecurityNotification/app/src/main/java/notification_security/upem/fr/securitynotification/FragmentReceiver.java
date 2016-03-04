@@ -18,11 +18,11 @@ public interface FragmentReceiver {
     }
 
     /**
-     * Receives the given intent to process.
+     * Receives the given intent from NetworkService to process.
      * If the receiver is not in WAITING_NETWORK_RESULT, it will
      * discard the call.
      *
      * @param intent the intent to process.
      */
-    void receiveIntent(Intent intent);
+    void onReceiveNetworkIntent(Intent intent);
 }

@@ -40,7 +40,7 @@ public class HomeActivity extends AppCompatActivity {
 
     /**
      * Broadcast manager receiving local intents from the NetworkService.
-     * The intent received will be dispatch in corresponding FragmentReceiver // TODO FragmentReceiver interface
+     * The intent received will be dispatch in corresponding FragmentReceiver
      * handled by the enclosing HomeActivity.
      */
     public class NetworkServiceReceiver extends BroadcastReceiver {
@@ -52,7 +52,8 @@ public class HomeActivity extends AppCompatActivity {
             String action = intent.getAction();
             switch (action) {
                 case NetworkService.ACTION_CHANGE_ACCESS_RES:
-
+                    // TODO get the fragment in the map.
+                    // TODO notify.
                     break;
                 default:
                     Log.e(TAG, "onReceive - unknown intent action : " + action);
