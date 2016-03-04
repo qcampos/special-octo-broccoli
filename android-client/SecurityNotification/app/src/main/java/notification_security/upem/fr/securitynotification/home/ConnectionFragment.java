@@ -100,10 +100,14 @@ public class ConnectionFragment extends BaseFragmentReceiver {
      */
     private void setLocalViews() {
         View view = getView();
-        etLogin = (EditText) view.findViewById(R.id.connection_etLogin);
-        etPin = (EditText) view.findViewById(R.id.connection_etPin);
-        btConnect = (Button) view.findViewById(R.id.connection_btConnect);
-        tvNewAccount = (TextView) view.findViewById(R.id.connection_tvNewAccount);
+        if (view != null) {
+            etLogin = (EditText) view.findViewById(R.id.connection_etLogin);
+            etPin = (EditText) view.findViewById(R.id.connection_etPin);
+            btConnect = (Button) view.findViewById(R.id.connection_btConnect);
+            tvNewAccount = (TextView) view.findViewById(R.id.connection_tvNewAccount);
+            return;
+        }
+        Log.e(TAG, "setLocalViews - can not retrieve the enclosing view.");
     }
 
 
