@@ -20,7 +20,8 @@ import static notification_security.upem.fr.securitynotification.ViewUtilities.g
 
 /**
  * Home activity. Performs life cycle control and binds other fragments.
- * TODO tell what fragments.
+ * TODO tell the list of fragments handled in HomeActivity.
+ * TODO Try to switch between fragment to show.
  */
 public class HomeActivity extends AppCompatActivity {
 
