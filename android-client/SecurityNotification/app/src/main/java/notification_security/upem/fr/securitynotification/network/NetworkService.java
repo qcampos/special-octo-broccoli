@@ -32,9 +32,9 @@ public class NetworkService extends IntentService {
     private static final String ACTION_SIGNUP = "fr.upem.securitynotification.network.action.SIGNUP";
     public static final String ACTION_SIGNUP_RES = "fr.upem.securitynotification.network.action.SIGNUP_RES";
     /*_______ Make your extras for the factory _______*/
-    // SignUp constants.
+    // Add Alert constants.
     private static final String ACTION_ADD_ALERT = "fr.upem.securitynotification.network.action.ADD_ALERT";
-    public static final String ACTION_ADD_ALERT_RES = "fr.upem.securitynotification.network.action.SIGNUP_ADD_ALERT_RES";
+    public static final String ACTION_ADD_ALERT_RES = "fr.upem.securitynotification.network.action.ADD_ALERT_RES";
     /*_______ Make your extras for the factory _______*/
 
 
@@ -100,7 +100,7 @@ public class NetworkService extends IntentService {
      */
     public static void startAddAlertAction(Context context, Position position) {
         Intent intent = new Intent(context, NetworkService.class);
-        intent.setAction(ACTION_SIGNUP);
+        intent.setAction(ACTION_ADD_ALERT);
         /* TODO intent.putExtra(EXTRA_CONNECT_LOGGING, logging); */
         context.startService(intent);
     }
@@ -118,6 +118,7 @@ public class NetworkService extends IntentService {
                     break;
                 // All next actions are grouped because for the moment we only want to receive true/false
                 // values in the view, but it will be separated.
+                case ACTION_ADD_ALERT:
                 case ACTION_CONNECT:
                 case ACTION_SIGNUP:
 

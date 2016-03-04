@@ -68,10 +68,11 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     @NonNull
-    public static IntentFilter createHomeFilters() {
+    private static IntentFilter createHomeFilters() {
         IntentFilter filter = new IntentFilter(NetworkService.ACTION_CHANGE_ACCESS_RES);
         filter.addAction(NetworkService.ACTION_CONNECT_RES);
         filter.addAction(NetworkService.ACTION_SIGNUP_RES);
+        filter.addAction(NetworkService.ACTION_ADD_ALERT_RES);
         return filter;
     }
 

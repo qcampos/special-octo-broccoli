@@ -22,6 +22,11 @@
             android:enabled="true"
             android:exported="false" >
         </receiver>
+
+        <activity
+            android:name=".map.UrgenceMapActivity"
+            android:label="@string/title_activity_urgence_map" >
+        </activity>
     </application>
 
 </manifest>
