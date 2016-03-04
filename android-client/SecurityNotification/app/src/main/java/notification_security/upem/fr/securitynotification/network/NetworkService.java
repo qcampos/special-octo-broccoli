@@ -13,9 +13,17 @@ import android.util.Log;
  */
 public class NetworkService extends IntentService {
     // List of ACTION, and their EXTRA constants keys this service can perform.
-    private static final String ACTION_CHANGE_ACCESS = "fr.upem.securitynotification.network.action.CHANGE_ACCESS";
-    private static final String EXTRA_CHANGE_ACCESS = "fr.upem.securitynotification.network.extra.CHANGE_ACCESS";
     private static final String TAG = NetworkService.class.getSimpleName();
+    // Chance access action constants.
+    private static final String ACTION_CHANGE_ACCESS = "fr.upem.securitynotification.network.action.CHANGE_ACCESS";
+    public static final String ACTION_CHANGE_ACCESS_RES = "fr.upem.securitynotification.network.action.CHANGE_ACCESS_RES";
+    public static final String EXTRA_CHANGE_ACCESS = "fr.upem.securitynotification.network.extra.CHANGE_ACCESS";
+    // Connect action constants.
+    private static final String ACTION_CONNECT = "fr.upem.securitynotification.network.action.CONNECT";
+    private static final String EXTRA_CONNECT_LOGGING = "fr.upem.securitynotification.network.extra.LOGGING";
+    private static final String EXTRA_CONNECT_PIN = "fr.upem.securitynotification.network.extra.PIN";
+
+
     private boolean accessActivityDirectly = false;
 
 
@@ -36,6 +44,22 @@ public class NetworkService extends IntentService {
         context.startService(intent);
     }
 
+    /**
+     * Starts this service to perform Connect Action with the given parameters.
+     * If the service is already performing a task ths action will be queued.
+     *
+     * @param context the context invoking this method.
+     * @param logging the logging to connect the app.
+     * @param pin     the pin associated with the logging to connect the app.
+     * @see IntentService
+     */
+    public static void startConnectAction(Context context, String logging, String pin) {
+        Intent intent = new Intent(context, NetworkService.class);
+        intent.setAction(ACTION_CONNECT);
+        intent.putExtra(EXTRA_CONNECT_LOGGING, logging);
+        intent.putExtra(EXTRA_CONNECT_PIN, pin);
+        context.startService(intent);
+    }
 
     public NetworkService() {
         super("NetworkService");
@@ -49,8 +73,13 @@ public class NetworkService extends IntentService {
                 case ACTION_CHANGE_ACCESS:
                     final boolean isDirect = intent.getBooleanExtra(EXTRA_CHANGE_ACCESS, accessActivityDirectly);
                     handleActionChangeAccess(isDirect);
+                    break;
+                case ACTION_CONNECT:
+                    Log.d(TAG, "handleActionConnect receiving new parameters...");
+                    break;
                 default:
-                    Log.e(TAG, "onHandleIntent ");
+                    Log.e(TAG, "onHandleIntent error in communication protocol.");
+                    break;
             }
         }
     }
