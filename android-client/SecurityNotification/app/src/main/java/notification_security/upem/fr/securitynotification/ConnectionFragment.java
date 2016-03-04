@@ -15,6 +15,8 @@ import android.widget.TextView;
 
 import notification_security.upem.fr.securitynotification.network.NetworkService;
 
+import static notification_security.upem.fr.securitynotification.ViewUtilities.showShortToast;
+
 /**
  * Fragments managing
  */
@@ -24,7 +26,7 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
     private static final String TAG = ConnectionFragment.class.getSimpleName();
 
     // Views.
-    private EditText etLogging;
+    private EditText etLogin;
     private EditText etPin;
     private Button btConnect;
     private TextView tvNewAccount;
@@ -55,7 +57,7 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
      */
     private void setLocalViews() {
         View view = getView();
-        etLogging = (EditText) view.findViewById(R.id.connection_etLogin);
+        etLogin = (EditText) view.findViewById(R.id.connection_etLogin);
         etPin = (EditText) view.findViewById(R.id.connection_etPin);
         btConnect = (Button) view.findViewById(R.id.connection_btConnect);
         tvNewAccount = (TextView) view.findViewById(R.id.connection_tvNewAccount);
@@ -77,7 +79,7 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
             @Override
             public void onClick(View v) {
                 // Retrieving logging and pin fields.
-                String logging = etLogging.getText().toString().trim();
+                String logging = etLogin.getText().toString().trim();
                 String pin = etPin.getText().toString().trim();
                 Log.v(TAG, "Connect button onClick (logging : " + logging + " - pin : " + pin + ")");
                 // Checking if fields are correct, aborting if not.
@@ -101,23 +103,43 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
     /**
      * Starts a connection request with the given parameters. It updates the view accordingly.
      */
-    private void startConnectionState(String logging, String pin) {
+    private void startConnectionState(String... fields) {
         // Guarding the request.
         if (state == FragmentState.WAITING_NETWORK_RESULT) {
             return;
         }
         state = FragmentState.WAITING_NETWORK_RESULT;
+        String login = fields[0];
+        String pin = fields[1];
         // Requesting the connection to the network.
-        requestConnection(logging, pin);
+        requestConnection(login, pin);
         // Setting button states.
         disableFields();
+    }
+
+    private void stopConnectionState() {
+        state = FragmentState.IDLE;
+        enableFields();
     }
 
 
     @Override
     public void onReceiveNetworkIntent(Intent intent) {
         // TODO discard guard on state not receiving.
-        Log.d(TAG, "onReceiveNetworkIntent - receiving a response intent.");
+        if (state != FragmentState.WAITING_NETWORK_RESULT) {
+            Log.e(TAG, "onReceiveNetworkIntent - Receiving not waited intent.");
+            return;
+        }
+        Log.d(TAG, "onReceiveNetworkIntent - receiving waited intent.");
+        boolean result = intent.getBooleanExtra(NetworkService.EXTRA_RES, false);
+        // Incorrect informations.
+        if (!result) {
+            showShortToast(getActivity(), "Information incorrectes");
+            stopConnectionState();
+            return;
+        }
+        // Correct informations. We can pass to the HomeIdleFragment.
+        // TODO pass to the HomeIdleFragment.
     }
 
     /**
@@ -129,12 +151,12 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
     private boolean parseTFInputs(String logging, String pin) {
         Activity activity = getActivity();
         if (logging.isEmpty() || pin.isEmpty()) {
-            ViewUtilities.showShortToast(activity, "Veuillez remplir tous les champs");
+            showShortToast(activity, "Veuillez remplir tous les champs");
             return true;
         }
         // Checking the minimal length.
         if (pin.length() < ProtocolConstants.PIN_LENGTH) {
-            ViewUtilities.showShortToast(activity, "PIN nécessite 4 chiffres");
+            showShortToast(activity, "PIN nécessite 4 chiffres");
             return true;
         }
         return false;
@@ -142,9 +164,17 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
 
     private void disableFields() {
         etPin.setEnabled(false);
-        etLogging.setEnabled(false);
+        etLogin.setEnabled(false);
         tvNewAccount.setEnabled(false);
         btConnect.setEnabled(false);
         btConnect.setText("CONNEXION...");
+    }
+
+    private void enableFields() {
+        etPin.setEnabled(true);
+        etLogin.setEnabled(true);
+        tvNewAccount.setEnabled(true);
+        btConnect.setEnabled(true);
+        btConnect.setText("SE CONNECTER");
     }
 }
