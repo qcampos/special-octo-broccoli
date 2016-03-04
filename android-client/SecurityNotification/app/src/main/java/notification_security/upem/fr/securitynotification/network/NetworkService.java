@@ -6,6 +6,8 @@ import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import notification_security.upem.fr.securitynotification.geolocalisation.Position;
+
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
@@ -29,6 +31,10 @@ public class NetworkService extends IntentService {
     // SignUp constants.
     private static final String ACTION_SIGNUP = "fr.upem.securitynotification.network.action.SIGNUP";
     public static final String ACTION_SIGNUP_RES = "fr.upem.securitynotification.network.action.SIGNUP_RES";
+    /*_______ Make your extras for the factory _______*/
+    // SignUp constants.
+    private static final String ACTION_ADD_ALERT = "fr.upem.securitynotification.network.action.ADD_ALERT";
+    public static final String ACTION_ADD_ALERT_RES = "fr.upem.securitynotification.network.action.SIGNUP_ADD_ALERT_RES";
     /*_______ Make your extras for the factory _______*/
 
 
@@ -80,6 +86,19 @@ public class NetworkService extends IntentService {
      */
     public static void startSignUpAction(Context context, String firstName, String lastName,
                                          String email, String phone, String PIN) {
+        Intent intent = new Intent(context, NetworkService.class);
+        intent.setAction(ACTION_SIGNUP);
+        /* TODO intent.putExtra(EXTRA_CONNECT_LOGGING, logging); */
+        context.startService(intent);
+    }
+
+    /**
+     * Starts this service to perform Add Alert Action with the given parameters.
+     * If the service is already performing a task ths action will be queued.
+     *
+     * @see IntentService
+     */
+    public static void startAddAlertAction(Context context, Position position) {
         Intent intent = new Intent(context, NetworkService.class);
         intent.setAction(ACTION_SIGNUP);
         /* TODO intent.putExtra(EXTRA_CONNECT_LOGGING, logging); */

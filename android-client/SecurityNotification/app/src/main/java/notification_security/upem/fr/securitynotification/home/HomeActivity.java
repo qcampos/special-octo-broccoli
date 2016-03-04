@@ -75,26 +75,40 @@ public class HomeActivity extends AppCompatActivity {
         return filter;
     }
 
-    void showFragment(FragmentReceiver fragmentToDisplayed) {
-        fragmentDisplayed = fragmentToDisplayed;
-        Fragment fragment = (Fragment) fragmentToDisplayed;
+    /**
+     * Shows the given FragmentReceiver by replacing the current one.
+     * Incoming intents from the NetworkService will be delegate to the
+     * new FragmentReceiver displayed.
+     *
+     * @param fragmentToShow the fragment to show.
+     */
+    void showFragment(FragmentReceiver fragmentToShow) {
+        fragmentDisplayed = fragmentToShow;
+        Fragment fragment = (Fragment) fragmentToShow;
         // Insert the fragment by replacing any existing fragment
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.home_fragment_container, fragment)
                 .addToBackStack(null)
                 .commit();
-        Log.d(TAG, "showFragment - called with : " + fragmentToDisplayed);
+        Log.d(TAG, "showFragment - called with : " + fragmentToShow);
     }
 
-    private void showFirstFragment(FragmentReceiver fragmentToDisplayed) {
-        Fragment fragment = (Fragment) fragmentToDisplayed;
+    /**
+     * The first fragment to show. It is inserted inside the home's fragment_container
+     * Incoming intents from the NetworkService will be delegate to the
+     * new FragmentReceiver displayed.
+     *
+     * @param fragmentToShow the fragment to show.
+     */
+    private void showFirstFragment(FragmentReceiver fragmentToShow) {
+        Fragment fragment = (Fragment) fragmentToShow;
         // Insert the fragment by replacing any existing fragment
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
                 .add(R.id.home_fragment_container, fragment)
                 .commit();
-        Log.d(TAG, "showFirstFragment - called with : " + fragmentToDisplayed);
+        Log.d(TAG, "showFirstFragment - called with : " + fragmentToShow);
     }
 
     /**
