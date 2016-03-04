@@ -1,5 +1,6 @@
 package notification_security.upem.fr.securitynotification.home;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.annotation.Nullable;
@@ -18,12 +19,12 @@ import notification_security.upem.fr.securitynotification.R;
  * Use the {@link HomeIdleFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeIdleFragment extends Fragment {
+public class HomeIdleFragment extends Fragment implements FragmentReceiver {
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_home_idle, container);
+        return inflater.inflate(R.layout.fragment_home_idle, container, false);
     }
 
     @Override
@@ -32,5 +33,15 @@ public class HomeIdleFragment extends Fragment {
         // Update after the activity has finished to load itself.
         // Set adapter, get view by ids...
         // getActivity and so on.
+    }
+
+    @Override
+    public void onReceiveNetworkIntent(Intent intent) {
+
+    }
+
+    @Override
+    public String getFilteredAction() {
+        return null; // TODO auto-generated.
     }
 }

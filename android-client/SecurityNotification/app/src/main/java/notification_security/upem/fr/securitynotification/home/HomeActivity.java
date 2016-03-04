@@ -68,7 +68,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void unregisterNetworkServiceReceiver() {
-        unregisterReceiver(serviceReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(serviceReceiver);
     }
 
 
@@ -79,7 +79,7 @@ public class HomeActivity extends AppCompatActivity {
         return filter;
     }
 
-    private void showFragment(FragmentReceiver fragmentToDisplayed) {
+    void showFragment(FragmentReceiver fragmentToDisplayed) {
         Fragment fragment = (Fragment) fragmentToDisplayed;
         // Insert the fragment by replacing any existing fragment
         FragmentManager fragmentManager = getFragmentManager();
@@ -111,16 +111,13 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            switch (action) {
-                case NetworkService.ACTION_CHANGE_ACCESS_RES:
-                    break;
-                case NetworkService.ACTION_CONNECT_RES:
-                    fragmentsMap.get(ConnectionFragment.class).onReceiveNetworkIntent(intent);
-                    break;
-                default:
-                    Log.e(TAG, "onReceive - unknown intent action : " + action);
-                    break;
+            if (!fragmentDisplayed.getFilteredAction().equals(action)) {
+                Log.e(TAG, "onReceive - action not corresponding to current fragment : " + action);
+                return;
+            } else {
+                // TODO if we receive an urgent map action when we are elsewhere, we must print it (perhaps in the scroll bar).
             }
+            fragmentDisplayed.onReceiveNetworkIntent(intent);
         }
     }
 }

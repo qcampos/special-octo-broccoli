@@ -25,4 +25,12 @@ public interface FragmentReceiver {
      * @param intent the intent to process.
      */
     void onReceiveNetworkIntent(Intent intent);
+
+    /**
+     * Returns the filter action filtered by the current FragmentReceiver.
+     * It only listen to this action.
+     *
+     * @return the filter action filtered.
+     */
+    String getFilteredAction();
 }

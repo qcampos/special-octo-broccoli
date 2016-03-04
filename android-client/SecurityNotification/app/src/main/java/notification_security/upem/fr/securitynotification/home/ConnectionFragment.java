@@ -34,6 +34,7 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
     private TextView tvNewAccount;
 
     // LifeCycle variables.
+    private HomeActivity parent;
     private FragmentState state;
 
     @Nullable
@@ -46,6 +47,8 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        // Setting the enclosing HomeActivity.
+        parent = (HomeActivity) getActivity();
         // Starting this fragment's life in IDLE state.
         state = FragmentState.IDLE;
         // Getting local views.
@@ -127,8 +130,12 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
 
 
     @Override
+    public String getFilteredAction() {
+        return NetworkService.ACTION_CONNECT_RES;
+    }
+
+    @Override
     public void onReceiveNetworkIntent(Intent intent) {
-        // TODO discard guard on state not receiving.
         if (state != FragmentState.WAITING_NETWORK_RESULT) {
             Log.e(TAG, "onReceiveNetworkIntent - Receiving not waited intent.");
             return;
@@ -142,7 +149,7 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
             return;
         }
         // Correct informations. We can pass to the HomeIdleFragment.
-        // TODO pass to the HomeIdleFragment.
+        parent.showFragment(new HomeIdleFragment());
     }
 
     /**
