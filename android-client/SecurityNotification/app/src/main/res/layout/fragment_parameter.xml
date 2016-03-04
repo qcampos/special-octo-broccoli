@@ -27,12 +27,13 @@
             android:padding="5dp">
 
             <TextView
+                android:id="@+id/parameter_text1"
                 android:layout_gravity="center_vertical|left"
                 android:layout_weight="0.75"
                 android:text="Petit (100m)" />
 
             <CheckBox
-                android:id="@+id/checkBox"
+                android:id="@+id/parameter_checkBox1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </TableRow>
@@ -45,12 +46,13 @@
             android:padding="5dp">
 
             <TextView
+                android:id="@+id/parameter_text2"
                 android:layout_gravity="center_vertical|left"
                 android:layout_weight="0.75"
                 android:text="Moyen (200m)" />
 
             <CheckBox
-                android:id="@+id/checkBox2"
+                android:id="@+id/parameter_checkBox2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </TableRow>
@@ -63,12 +65,13 @@
             android:padding="5dp">
 
             <TextView
+                android:id="@+id/parameter_text3"
                 android:layout_gravity="center_vertical|left"
                 android:layout_weight="0.75"
                 android:text="Grand (300m)" />
 
             <CheckBox
-                android:id="@+id/checkBox3"
+                android:id="@+id/parameter_checkBox3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </TableRow>
@@ -82,6 +85,7 @@
         android:text="Note : Ce critère n'influera pas sur la durée de vie de la batterie de votre téléphone." />
 
     <Button
+        android:id="@+id/parameter_btSave"
         style="@style/ButtonAppTheme"
         android:layout_width="fill_parent"
         android:layout_height="60dp"
@@ -92,6 +96,7 @@
 
 
     <TextView
+        android:id="@+id/parameter_tvCancel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"

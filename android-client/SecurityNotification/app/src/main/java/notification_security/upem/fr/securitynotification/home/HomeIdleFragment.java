@@ -1,5 +1,6 @@
 package notification_security.upem.fr.securitynotification.home;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -15,6 +16,7 @@ import notification_security.upem.fr.securitynotification.geolocalisation.Positi
 import notification_security.upem.fr.securitynotification.home.FragmentReceiver.BaseFragmentReceiver;
 import notification_security.upem.fr.securitynotification.map.UrgencyMapActivity;
 import notification_security.upem.fr.securitynotification.network.NetworkService;
+import notification_security.upem.fr.securitynotification.network.ProtocolConstants;
 
 import static notification_security.upem.fr.securitynotification.ViewUtilities.showShortToast;
 
@@ -55,7 +57,9 @@ public class HomeIdleFragment extends BaseFragmentReceiver {
     @Override
     void performNetworkRequest(HomeActivity homeActivity, String... params) {
         // TODO retrieve good position.
-        NetworkService.startAddAlertAction(homeActivity, new Position(7777, 7777));
+        int radius = homeActivity.getPreferences(Context.MODE_PRIVATE)
+                .getInt(ProtocolConstants.RADIUS_KEY, ProtocolConstants.DEFAULT_RADIUS);
+        NetworkService.startAddAlertAction(homeActivity, new Position(7777, 7777), Integer.toString(radius));
     }
 
     @Override

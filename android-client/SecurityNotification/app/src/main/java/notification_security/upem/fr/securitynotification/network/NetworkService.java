@@ -102,7 +102,7 @@ public class NetworkService extends IntentService {
      *
      * @see IntentService
      */
-    public static void startAddAlertAction(Context context, Position position) {
+    public static void startAddAlertAction(Context context, Position position, String radius) {
         Intent intent = new Intent(context, NetworkService.class);
         intent.setAction(ACTION_ADD_ALERT);
         /* TODO intent.putExtra(EXTRA_CONNECT_LOGGING, logging); */
