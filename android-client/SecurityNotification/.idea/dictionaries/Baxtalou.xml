@@ -2,7 +2,9 @@
   <dictionary name="Baxtalou">
     <words>
       <w>edittext</w>
+      <w>firstname</w>
       <w>informations</w>
+      <w>lastname</w>
       <w>parameterizing</w>
       <w>securitynotification</w>
       <w>upem</w>

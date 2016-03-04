@@ -35,4 +35,18 @@ public class ViewUtilities {
     public static FragmentReceiver getFragmentById(FragmentManager fragmentManager, int fragmentID) {
         return (FragmentReceiver) fragmentManager.findFragmentById(fragmentID);
     }
+
+    /**
+     * Tests if one of the given strings is empty.
+     *
+     * @return true if at least one is empty, false otherwise.
+     */
+    public static boolean areEmpty(String... strings) {
+        for (String s : strings) {
+            if (s.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

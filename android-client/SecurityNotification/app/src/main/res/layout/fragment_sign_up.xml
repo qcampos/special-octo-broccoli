@@ -14,19 +14,21 @@
         android:textSize="20dp" />
 
     <EditText
+        android:id="@+id/signUp_etLastname"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
         android:hint="Nom" />
 
     <EditText
+        android:id="@+id/signUp_etFirstname"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
         android:hint="Prénom" />
 
     <EditText
-        android:id="@+id/editText"
+        android:id="@+id/signUp_etMail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
@@ -37,7 +39,7 @@
 
 
     <EditText
-        android:id="@+id/editText2"
+        android:id="@+id/signUp_etPhone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
@@ -46,12 +48,17 @@
         android:inputType="phone" />
 
     <EditText
+        android:id="@+id/signUp_etPIN"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
-        android:hint="PIN" />
+        android:ems="10"
+        android:hint="PIN"
+        android:inputType="numberPassword"
+        android:maxLength="4" />
 
     <Button
+        android:id="@+id/signUp_btCreate"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -59,6 +66,7 @@
         android:text="CRÉER" />
 
     <TextView
+        android:id="@+id/signUp_etUseExistingAccount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"

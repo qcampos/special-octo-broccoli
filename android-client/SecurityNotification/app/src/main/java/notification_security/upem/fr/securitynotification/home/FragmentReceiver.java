@@ -6,7 +6,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 /**
- * Created by Baxtalou on 04/03/2016.
+ * A FragmentReceiver can receive as a delegate a specific intent. Which corresponds to
+ * its action, returned by its getFilteredAction method.
  */
 public interface FragmentReceiver {
 
@@ -70,7 +71,7 @@ public interface FragmentReceiver {
         /**
          * Processes network results placed into the given intent.
          * The HomeActivity instance allows the view fragment to notify changes to this
-         * class.
+         * class. There is no need to check the intent which is already checked.
          *
          * @param homeActivity enclosing activity to notify of changes if needed (like changing screen)
          * @param intent       The NetworkService result intent to extract.

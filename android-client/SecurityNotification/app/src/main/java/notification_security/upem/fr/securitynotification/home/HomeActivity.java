@@ -12,8 +12,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import java.util.HashMap;
-
 import notification_security.upem.fr.securitynotification.R;
 import notification_security.upem.fr.securitynotification.network.NetworkService;
 
@@ -23,8 +21,10 @@ import notification_security.upem.fr.securitynotification.network.NetworkService
  */
 public class HomeActivity extends AppCompatActivity {
 
+    // The logging TAG
+    private static final String TAG = HomeActivity.class.getSimpleName();
+
     private NetworkServiceReceiver serviceReceiver;
-    private HashMap<Class<? extends FragmentReceiver>, FragmentReceiver> fragmentsMap;
     private FragmentReceiver fragmentDisplayed;
 
     @Override
@@ -34,10 +34,8 @@ public class HomeActivity extends AppCompatActivity {
         serviceReceiver = new NetworkServiceReceiver();
         // Storing all managed fragments receiver.
         setContentView(R.layout.activity_home);
-        fragmentsMap = new HashMap<>();
-        fragmentDisplayed = new ConnectionFragment();
-        fragmentsMap.put(ConnectionFragment.class, fragmentDisplayed);
         // Show code.
+        fragmentDisplayed = new ConnectionFragment();
         showFirstFragment(fragmentDisplayed);
     }
 
@@ -73,10 +71,12 @@ public class HomeActivity extends AppCompatActivity {
     public static IntentFilter createHomeFilters() {
         IntentFilter filter = new IntentFilter(NetworkService.ACTION_CHANGE_ACCESS_RES);
         filter.addAction(NetworkService.ACTION_CONNECT_RES);
+        filter.addAction(NetworkService.ACTION_SIGNUP_RES);
         return filter;
     }
 
     void showFragment(FragmentReceiver fragmentToDisplayed) {
+        fragmentDisplayed = fragmentToDisplayed;
         Fragment fragment = (Fragment) fragmentToDisplayed;
         // Insert the fragment by replacing any existing fragment
         FragmentManager fragmentManager = getFragmentManager();
@@ -84,16 +84,17 @@ public class HomeActivity extends AppCompatActivity {
                 .replace(R.id.home_fragment_container, fragment)
                 .addToBackStack(null)
                 .commit();
+        Log.d(TAG, "showFragment - called with : " + fragmentToDisplayed);
     }
 
     private void showFirstFragment(FragmentReceiver fragmentToDisplayed) {
         Fragment fragment = (Fragment) fragmentToDisplayed;
         // Insert the fragment by replacing any existing fragment
         FragmentManager fragmentManager = getFragmentManager();
-        Log.d("azeaz", "FragmentManager " + fragment);
         fragmentManager.beginTransaction()
                 .add(R.id.home_fragment_container, fragment)
                 .commit();
+        Log.d(TAG, "showFirstFragment - called with : " + fragmentToDisplayed);
     }
 
     /**
@@ -111,9 +112,8 @@ public class HomeActivity extends AppCompatActivity {
             if (!fragmentDisplayed.getFilteredAction().equals(action)) {
                 Log.e(TAG, "onReceive - action not corresponding to current fragment : " + action);
                 return;
-            } else {
-                // TODO if we receive an urgent map action when we are elsewhere, we must print it (perhaps in the scroll bar).
             }
+            // TODO if we receive an urgent map action when we are elsewhere, we must print it (perhaps in the scroll bar).
             fragmentDisplayed.onReceiveNetworkIntent(intent);
         }
     }

@@ -26,10 +26,17 @@ public class NetworkService extends IntentService {
     public static final String ACTION_CONNECT_RES = "fr.upem.securitynotification.network.action.CONNECT_RES";
     private static final String EXTRA_CONNECT_LOGGING = "fr.upem.securitynotification.network.extra.LOGGING";
     private static final String EXTRA_CONNECT_PIN = "fr.upem.securitynotification.network.extra.PIN";
+    // SignUp constants.
+    private static final String ACTION_SIGNUP = "fr.upem.securitynotification.network.action.SIGNUP";
+    public static final String ACTION_SIGNUP_RES = "fr.upem.securitynotification.network.action.SIGNUP_RES";
+    /*_______ Make your extras for the factory _______*/
 
 
     private boolean accessActivityDirectly = false;
 
+    public NetworkService() {
+        super("NetworkService");
+    }
 
     /**
      * Starts this service to perform Change Access with the given mode.
@@ -65,8 +72,18 @@ public class NetworkService extends IntentService {
         context.startService(intent);
     }
 
-    public NetworkService() {
-        super("NetworkService");
+    /**
+     * Starts this service to perform SignUp Action with the given parameters.
+     * If the service is already performing a task ths action will be queued.
+     *
+     * @see IntentService
+     */
+    public static void startSignUpAction(Context context, String firstName, String lastName,
+                                         String email, String phone, String PIN) {
+        Intent intent = new Intent(context, NetworkService.class);
+        intent.setAction(ACTION_SIGNUP);
+        /* TODO intent.putExtra(EXTRA_CONNECT_LOGGING, logging); */
+        context.startService(intent);
     }
 
     @Override
@@ -75,23 +92,27 @@ public class NetworkService extends IntentService {
             final String action = intent.getAction();
             switch (action) {
                 case ACTION_CHANGE_ACCESS:
+                    // This is a handle method for example. You can do all your stuff
+                    // On this basis.
                     final boolean isDirect = intent.getBooleanExtra(EXTRA_CHANGE_ACCESS, accessActivityDirectly);
                     handleActionChangeAccess(isDirect);
                     break;
+                // All next actions are grouped because for the moment we only want to receive true/false
+                // values in the view, but it will be separated.
                 case ACTION_CONNECT:
-                    // TODO call the corresponding handle method.
-                    Log.v(TAG, "handleActionConnect receiving new parameters...");
+                case ACTION_SIGNUP:
 
+                    // TODO call the corresponding handle method.
+                    Log.v(TAG, "handleActionXX receiving new parameters...");
                     // TODO this is the type of answer made when accessActivityDirectly == true.
-                    Intent localIntent = new Intent(ACTION_CONNECT_RES);
-                    try {
-                        Thread.sleep(1500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    Intent localIntent = new Intent(action + "_RES");
+                    // Always put this boolean which tells us if everything went good, or if we
+                    // will have to process error fields.
                     localIntent.putExtra(EXTRA_RES, true);
                     sendLocalBroadcast(localIntent);
+
                     break;
+
                 default:
                     Log.e(TAG, "onHandleIntent error in communication protocol.");
                     break;

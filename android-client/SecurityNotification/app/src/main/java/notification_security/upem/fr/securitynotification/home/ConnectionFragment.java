@@ -116,13 +116,9 @@ public class ConnectionFragment extends BaseFragmentReceiver {
      */
     private void setClickListeners() {
         setConnectButtonListener();
-        tvNewAccount.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getHomeActivity().showFragment(new SignUpFragment());
-            }
-        });
+        setNewAccountTVListener();
     }
+
 
     /**
      * Sets the connect button listener.
@@ -136,9 +132,20 @@ public class ConnectionFragment extends BaseFragmentReceiver {
                 String pin = etPin.getText().toString().trim();
                 Log.v(TAG, "Connect button onClick (logging : " + logging + " - pin : " + pin + ")");
                 // Checking if fields are correct, aborting if not.
-                if (validateTFInputs(logging, pin)) return;
-                // Now requesting the connection and updating the button accordingly.
+                if (!validateTFInputs(logging, pin)) return;
                 requestNetworkAction(logging, pin);
+            }
+        });
+    }
+
+    /**
+     * Sets the new account listener.
+     */
+    private void setNewAccountTVListener() {
+        tvNewAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getHomeActivity().showFragment(new SignUpFragment());
             }
         });
     }
@@ -150,17 +157,17 @@ public class ConnectionFragment extends BaseFragmentReceiver {
      * @return true if every fields are valid, false otherwise.
      */
     private boolean validateTFInputs(String logging, String pin) {
-        Activity activity = getActivity();
+        Activity activity = getHomeActivity();
         if (logging.isEmpty() || pin.isEmpty()) {
             showShortToast(activity, "Veuillez remplir tous les champs");
-            return true;
+            return false;
         }
         // Checking the minimal length.
         if (pin.length() < ProtocolConstants.PIN_LENGTH) {
             showShortToast(activity, "PIN nécessite 4 chiffres");
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
 }
