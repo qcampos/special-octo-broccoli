@@ -4,6 +4,8 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.widget.Toast;
 
+import notification_security.upem.fr.securitynotification.home.FragmentReceiver;
+
 /**
  * Provides utilities methods for views.
  */

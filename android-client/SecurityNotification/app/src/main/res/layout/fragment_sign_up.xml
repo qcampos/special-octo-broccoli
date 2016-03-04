@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="20dp"
-    tools:context="notification_security.upem.fr.securitynotification.SignUpFragment">
+    tools:context="notification_security.upem.fr.securitynotification.home.SignUpFragment">
 
     <TextView
         android:layout_width="wrap_content"

@@ -1,4 +1,4 @@
-package notification_security.upem.fr.securitynotification;
+package notification_security.upem.fr.securitynotification.home;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -14,9 +14,8 @@ import android.util.Log;
 
 import java.util.HashMap;
 
+import notification_security.upem.fr.securitynotification.R;
 import notification_security.upem.fr.securitynotification.network.NetworkService;
-
-import static notification_security.upem.fr.securitynotification.ViewUtilities.getFragmentById;
 
 /**
  * Home activity. Performs life cycle control and binds other fragments.
@@ -27,18 +26,22 @@ public class HomeActivity extends AppCompatActivity {
 
     private NetworkServiceReceiver serviceReceiver;
     private HashMap<Class<? extends FragmentReceiver>, FragmentReceiver> fragmentsMap;
+    private FragmentReceiver fragmentDisplayed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
         // Our receiver, dispatching answers from the network service to our fragments.
         serviceReceiver = new NetworkServiceReceiver();
         // Storing all managed fragments receiver.
+        setContentView(R.layout.activity_home);
         fragmentsMap = new HashMap<>();
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentsMap.put(ConnectionFragment.class, getFragmentById(fragmentManager, R.id.fragment_connection));
+        fragmentDisplayed = new ConnectionFragment();
+        fragmentsMap.put(ConnectionFragment.class, fragmentDisplayed);
+        // Show code.
+        showFirstFragment(fragmentDisplayed);
     }
+
 
     @Override
     protected void onResume() {
@@ -74,6 +77,26 @@ public class HomeActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter(NetworkService.ACTION_CHANGE_ACCESS_RES);
         filter.addAction(NetworkService.ACTION_CONNECT_RES);
         return filter;
+    }
+
+    private void showFragment(FragmentReceiver fragmentToDisplayed) {
+        Fragment fragment = (Fragment) fragmentToDisplayed;
+        // Insert the fragment by replacing any existing fragment
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.home_fragment_container, fragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    private void showFirstFragment(FragmentReceiver fragmentToDisplayed) {
+        Fragment fragment = (Fragment) fragmentToDisplayed;
+        // Insert the fragment by replacing any existing fragment
+        FragmentManager fragmentManager = getFragmentManager();
+        Log.d("azeaz", "FragmentManager " + fragment);
+        fragmentManager.beginTransaction()
+                .add(R.id.home_fragment_container, fragment)
+                .commit();
     }
 
     /**

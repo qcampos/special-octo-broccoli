@@ -1,4 +1,4 @@
-package notification_security.upem.fr.securitynotification;
+package notification_security.upem.fr.securitynotification.home;
 
 import android.content.Intent;
 

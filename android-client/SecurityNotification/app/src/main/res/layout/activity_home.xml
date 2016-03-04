@@ -2,11 +2,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="notification_security.upem.fr.securitynotification.HomeActivity">
+    tools:context="notification_security.upem.fr.securitynotification.home.HomeActivity">
 
-    <fragment
-        android:id="@+id/fragment_connection"
-        android:name="notification_security.upem.fr.securitynotification.ConnectionFragment"
+    <FrameLayout
+        android:id="@+id/home_fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </FrameLayout>

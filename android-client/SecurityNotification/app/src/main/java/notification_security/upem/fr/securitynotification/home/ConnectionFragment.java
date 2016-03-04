@@ -1,4 +1,4 @@
-package notification_security.upem.fr.securitynotification;
+package notification_security.upem.fr.securitynotification.home;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -13,6 +13,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import notification_security.upem.fr.securitynotification.network.ProtocolConstants;
+import notification_security.upem.fr.securitynotification.R;
 import notification_security.upem.fr.securitynotification.network.NetworkService;
 
 import static notification_security.upem.fr.securitynotification.ViewUtilities.showShortToast;
@@ -37,7 +39,8 @@ public class ConnectionFragment extends Fragment implements FragmentReceiver {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_connection, container);
+        // We have to use false to attache the current fragment to the desired parent.
+        return inflater.inflate(R.layout.fragment_connection, container, false);
     }
 
     @Override

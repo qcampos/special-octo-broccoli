@@ -1,7 +1,5 @@
-package notification_security.upem.fr.securitynotification;
+package notification_security.upem.fr.securitynotification.home;
 
-import android.app.Activity;
-import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.annotation.Nullable;
@@ -9,21 +7,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import notification_security.upem.fr.securitynotification.R;
+
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link ParameterFragment.OnFragmentInteractionListener} interface
+ * {@link HomeIdleFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link ParameterFragment#newInstance} factory method to
+ * Use the {@link HomeIdleFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ParameterFragment extends Fragment {
+public class HomeIdleFragment extends Fragment {
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_parameter, container);
+        return inflater.inflate(R.layout.fragment_home_idle, container);
     }
 
     @Override
