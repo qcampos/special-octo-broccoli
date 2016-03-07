@@ -250,7 +250,7 @@ def GCMPostToTopic(topic, data):
     :return: True if the message could be sent, False if not (and the reason is logged
     """
     data = {
-        "to": "/topic/{}".format(topic),
+        "to": "/topics/{}".format(topic),
         "data": data,
         "priority": "high"
     }
