@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">SecurityNotification</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="title_activity_home">Security Notification</string>
+    <string name="title_activity_urgence_map">UrgenceMapActivity</string>
+</resources>

@@ -1,0 +1,29 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="notification_security.upem.fr.securitynotification.home.HomeAlertedFragment">
+
+    <Button
+        style="@style/ButtonAppThemeIdle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.5"
+        android:lineSpacingExtra="10dp"
+        android:clickable="false"
+        android:text="URGENCE EMISE\n(en cours)"
+        android:textAllCaps="false" />
+
+
+    <Button
+        android:id="@+id/home_alerted_btEndAlert"
+        style="@style/ButtonAppThemeDanger"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:lineSpacingExtra="10dp"
+        android:text="FIN DE L'ALERTE"
+        android:textAllCaps="false" />
+
+</LinearLayout>

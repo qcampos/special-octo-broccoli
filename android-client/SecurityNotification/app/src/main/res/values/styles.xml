@@ -1,0 +1,47 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppThemess" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <!-- Main theme colors -->
+        <item name="actionBarStyle">@style/Widget.AppTheme.ActionBar</item>
+        <item name="buttonStyle">@style/ButtonAppTheme</item>
+        <!-- Edittext bottom line color -->
+        <item name="colorControlActivated">@color/main_blue</item>
+    </style>
+
+    <!-- Action bar theme -->
+    <style name="Widget.AppTheme.ActionBar" parent="Widget.AppCompat.ActionBar.Solid">
+        <!-- action bar background -->
+        <item name="background">@color/main_blue</item>
+        <!-- action bar elevation -->
+        <item name="elevation">4dp</item>
+    </style>
+
+    <!-- Button theme -->
+    <style name="ButtonAppTheme" parent="Widget.AppCompat.Button">
+        <item name="backgroundTint">@color/main_blue</item>
+        <item name="android:textColor">@color/btn_text_color</item>
+    </style>
+    <!-- Button theme success -->
+    <style name="ButtonAppThemeSuccess" parent="Widget.AppCompat.Button">
+        <item name="backgroundTint">@color/main_green</item>
+        <item name="android:textColor">@color/btn_text_color</item>
+    </style>
+    <!-- Button theme idle -->
+    <style name="ButtonAppThemeIdle" parent="Widget.AppCompat.Button">
+        <item name="backgroundTint">@color/disable_color</item>
+        <item name="android:textColor">@color/btn_text_color</item>
+    </style>
+    <!-- Button theme danger -->
+    <style name="ButtonAppThemeDanger" parent="Widget.AppCompat.Button">
+        <item name="backgroundTint">@android:color/holo_red_light</item>
+        <item name="android:textColor">@color/btn_text_color</item>
+    </style>
+
+    <color name="btn_text_color">#ffffff</color>
+    <color name="main_green">#4CAF50</color>
+    <color name="disable_color">#767676</color>
+    <color name="main_blue">#009BF4</color>
+    <color name="error_color">#D32F2F</color>
+</resources>

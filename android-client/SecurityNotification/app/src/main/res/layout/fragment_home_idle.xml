@@ -1,0 +1,41 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="notification_security.upem.fr.securitynotification.home.HomeIdleFragment">
+
+    <Button
+        android:id="@+id/home_idle_btAlert"
+        style="@style/ButtonAppThemeSuccess"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.5"
+        android:lineSpacingExtra="10dp"
+        android:text="EMETTRE URGENCE\n(3 clics rapides)"
+        android:textAllCaps="false" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_weight="0.4"
+        android:gravity="center|top"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/home_idle_btUrgencyMap"
+            android:layout_width="270dp"
+            android:layout_height="64dp"
+            android:layout_marginTop="15dp"
+            android:text="CARTE DES URGENCES" />
+
+        <Button
+            android:id="@+id/home_idle_btSettings"
+            android:layout_width="270dp"
+            android:layout_height="64dp"
+            android:layout_marginTop="10dp"
+            android:text="PARAMÈTRES" />
+    </LinearLayout>
+
+</LinearLayout>

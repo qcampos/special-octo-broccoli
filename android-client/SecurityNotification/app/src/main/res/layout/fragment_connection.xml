@@ -1,0 +1,57 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:padding="26px"
+    android:id="@+id/fragment_connection"
+    tools:context="notification_security.upem.fr.securitynotification.home.ConnectionFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20px"
+            android:text="Entrez votre code PIN pour lancer l'application." />
+
+        <EditText
+            android:id="@+id/connection_etLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="100px"
+            android:inputType="phone"
+            android:hint="Numéro" />
+
+        <EditText
+            android:id="@+id/connection_etPin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30px"
+            android:ems="10"
+            android:hint="PIN"
+            android:inputType="numberPassword"
+            android:maxLength="4" />
+
+        <Button
+            android:id="@+id/connection_btConnect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="90px"
+            android:text="SE CONNECTER" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/connection_tvNewAccount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="70px"
+        android:gravity="center"
+        android:text="Créer un nouveau compte"
+        android:textColor="@color/error_color" />
+</RelativeLayout>
