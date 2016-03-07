@@ -23,8 +23,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="100px"
-            android:inputType="phone"
-            android:hint="Numéro" />
+            android:inputType="textEmailAddress"
+            android:hint="Email" />
 
         <EditText
             android:id="@+id/connection_etPin"
