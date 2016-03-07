@@ -238,7 +238,7 @@ def checkSession(sessionId):
 ############################################################
 
 # TODO Move to settings?
-GCM_API_KEY = "AIzaSyCA0nYK3waZc5VIeCbCHlEtw8NBpjOzzbI"
+GCM_API_KEY = "AIzaSyByMfvnFv-akvkt89vudqvoH_Mm1sWXOzo"
 GCM_API_URL = "https://gcm-http.googleapis.com/gcm/send"
 
 
