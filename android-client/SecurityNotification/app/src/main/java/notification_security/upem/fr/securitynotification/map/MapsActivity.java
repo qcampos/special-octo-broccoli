@@ -57,7 +57,7 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             GeoLocalisationServiceB.LocalBinder binder = (GeoLocalisationServiceB.LocalBinder) service;
             geoLocalisationServiceB = binder.getService();
-            geoLocalisationServiceB.subscribeUpdateLocation(MapsActivity.this, 1);
+            geoLocalisationServiceB.subscribeLocationUpdate(MapsActivity.this, MapsActivity.this, 1);
             serviceReceiver = new NetworkServiceReceiver();
             mBound = true;
         }
