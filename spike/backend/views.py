@@ -17,6 +17,8 @@ import threading
 
 from backend.models import User, Alert, Session, Vote
 
+logger = logging.getLogger('django')
+
 # HTTP Return Codes
 HTTP_OK = 200
 HTTP_BAD_REQUEST = 400
@@ -87,14 +89,14 @@ def answerSuccess(success):
     return genJsonResponse(json.dumps({"success": success}))
 
 
-def answerSession(session, expiration):
+def answerSession(session, expiration, user_id):
     """ Return a valid http answer to inform the user of the attribution of a new session
 
     :param session: the session id
     :param expiration: the timestamp for the expiration of the session
     :return: the HttpResponse object fully initialized
     """
-    return genJsonResponse(json.dumps({"session": str(session), "expire": str(expiration)}))
+    return genJsonResponse(json.dumps({"session": str(session), "expire": str(expiration), "user": str(user_id)}))
 
 
 def answerSessionNotFound():
@@ -155,7 +157,7 @@ def genJsonResponse(json_string, return_code=200):
 def validateJson(dictionary, keys):
     """ Ensure that the given dictionary contains all the given keys.
 
-    :param dictionary: the dictionary
+    :param dictionary: the dictionary
     :param keys: a list of hashable objects.
     :return: True is all the objects of the keys list are into the dictionary.
     """
@@ -263,14 +265,20 @@ def GCMPostToTopic(topic, data):
     req = urllib.request.Request(url=GCM_API_URL, data=data, headers=headers)
 
     try:
-        urllib.request.urlopen(req)
+        answer = urllib.request.urlopen(req)
+        data = json.loads(answer.read().decode('utf-8'))
+
+        # Parsing the response to check if we failed at some point
+        if 'failure' in data or 'message_id' not in data:
+            logger.error("The message failed to send sent to {}".format(topic))
+            return False
     except urllib.error.HTTPError as err:
-        logging.error("HTTP error code {} received when sending messing to topic {}".format(err.code, topic))
+        logger.error("HTTP error code {} received when sending messing to topic {}".format(err.code, topic))
         return False
     except urllib.error.URLError as err:
-        logging.error("The url {} couldn't be reached".format(GCM_API_URL))
+        logger.error("The url {} couldn't be reached".format(GCM_API_URL))
         return False
-    logging.info("Successfully sending GCM message to {}".format(topic))
+    logger.info("Successfully sending GCM message to {} with message_id {}".format(topic, data['message_id']))
     return True
 
 
@@ -281,7 +289,7 @@ def notifyNewAlert(al):
     """
     users = [usr for usr in User.objects.filter(last_position__isnull=False)
              if al.distance(usr.last_position) < usr.radius]
-    logging.info("Notifying {} users for the alert {}".format(len(users), al))
+    logger.info("Notifying {} users for the alert {}".format(len(users), al))
 
     data = {
         "id": str(al.id),
@@ -291,7 +299,7 @@ def notifyNewAlert(al):
 
     for user in users:
         topic = "user-{}".format(str(user.id))
-        GCMPostToTopic(topic,data)
+        GCMPostToTopic(topic, data)
 
 
 ##############################
@@ -374,7 +382,7 @@ def userLogin(request):
     session = Session(user=user, expiration=expiration)
     session.save()
 
-    return answerSession(session.id, expiration)
+    return answerSession(session.id, expiration, user.id)
 
 
 @csrf_exempt
@@ -456,11 +464,9 @@ def alertGetlist(request):
     user.radius = radius
     user.save()
 
-    # Create the current user point
-    point = GEOSGeometry('SRID=4326;POINT({} {})'.format(latitude, longitude))
     # Only get the alerts that are actives and in the radius
     activeAlerts = list(Alert.objects.filter(isActive=True).all())
-    distantAlerts = [a for a in activeAlerts if a.distance(point) < user.radius]
+    distantAlerts = [a for a in activeAlerts if a.distance(user.last_position) < user.radius]
 
     # Make and return the corresponding dictionary
     alerts = [{"id": str(a.id)} for a in distantAlerts]
@@ -534,8 +540,14 @@ def alertAdd(request):
     except SessionCheckFail as fail:
         return fail.response
 
+    longitude = json_data['long']
+    latitude = json_data['lat']
+    # Update the current position of the user while we can.
+    user.updatePosition(longitude, latitude)
+
     # Creating the alert and checking validity.
-    alert = Alert(author=user, name=json_data["name"], alert_position=Point(float(json_data['long']), float(json_data['lat'])))
+    alert = Alert(author=user, name=json_data["name"], alert_position=Point(float(json_data['long']),
+                                                                            float(json_data['lat'])))
     try:
         alert.full_clean(validate_unique=True)
     except ValidationError as ve:
@@ -579,6 +591,7 @@ def alertClose(request):
 
     # Sending notification that the alert is now closed
     topic = "alert-{}".format(alert.id)
+    logger.info("Topic : {}".format(topic))
     data = {
         "isActive": False
     }

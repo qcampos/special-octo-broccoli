@@ -92,10 +92,14 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, 'debug.log'),
         },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
     },
     'loggers': {
         'django': {
-            'handlers': ['file'],
+            'handlers': ['file', 'console'],
             'level': 'INFO',
             'propagate': True,
         },
