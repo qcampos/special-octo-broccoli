@@ -73,6 +73,11 @@ public class HomeAlertedFragment extends BaseFragmentReceiver {
     }
 
     @Override
+    public boolean onBackPressed() {
+        return false;
+    }
+
+    @Override
     public String getFilteredAction() {
         return NetworkService.ACTION_STOP_ALERT_RES;
     }

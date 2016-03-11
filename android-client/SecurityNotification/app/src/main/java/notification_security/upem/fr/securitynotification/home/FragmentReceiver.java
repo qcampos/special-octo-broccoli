@@ -11,6 +11,7 @@ import android.util.Log;
  */
 public interface FragmentReceiver {
 
+
     /**
      * A FragmentState tells if the current enclosing Fragment is waiting
      * for a network result or not. It could have been replaced by a simple boolean,
@@ -38,6 +39,11 @@ public interface FragmentReceiver {
      */
     String getFilteredAction();
 
+    /**
+     * Back button is pressed.
+     * return true if the action is captured, false otherwise.
+     */
+    boolean onBackPressed();
 
     /**
      * Abstract Fragment factorizing and handling all network verifications

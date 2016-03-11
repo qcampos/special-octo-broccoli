@@ -129,6 +129,11 @@ public class HomeIdleFragment extends BaseFragmentReceiver {
         });
     }
 
+    @Override
+    public boolean onBackPressed() {
+        return false;
+    }
+
     private void updateAlertCount() {
         btAlert.setText("EMETTRE URGENCE\n(" + count + " clics rapides)");
     }

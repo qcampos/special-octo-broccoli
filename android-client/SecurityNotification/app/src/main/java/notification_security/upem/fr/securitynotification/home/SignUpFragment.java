@@ -142,6 +142,12 @@ public class SignUpFragment extends BaseFragmentReceiver {
         });
     }
 
+    @Override
+    public boolean onBackPressed() {
+        getHomeActivity().showFragment(new ConnectionFragment());
+        return true;
+    }
+
     private boolean validateTFInputs(String firstName, String lastName, String email, String phone, String pin) {
         Activity activity = getHomeActivity();
         // Verifying contents.

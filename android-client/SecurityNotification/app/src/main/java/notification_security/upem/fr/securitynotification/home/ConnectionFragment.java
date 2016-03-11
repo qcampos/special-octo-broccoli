@@ -157,6 +157,12 @@ public class ConnectionFragment extends BaseFragmentReceiver {
         });
     }
 
+    @Override
+    public boolean onBackPressed() {
+        Log.v(TAG, "Back button pressed");
+        return false;
+    }
+
     /**
      * Parses text fields inputs value. Sends toast if any error
      * are detected.

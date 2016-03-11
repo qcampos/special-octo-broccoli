@@ -136,6 +136,11 @@ public class ParameterFragment extends BaseFragmentReceiver {
         });
     }
 
+    @Override
+    public boolean onBackPressed() {
+        getHomeActivity().showFragment(new HomeIdleFragment());
+        return true;
+    }
 
     private void setCheckBox3Listener() {
         cb3.setOnClickListener(new View.OnClickListener() {

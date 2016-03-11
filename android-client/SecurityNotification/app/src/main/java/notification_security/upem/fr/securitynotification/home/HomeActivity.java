@@ -40,6 +40,12 @@ public class HomeActivity extends AppCompatActivity {
         showFirstFragment(fragmentDisplayed);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (!fragmentDisplayed.onBackPressed()) {
+            super.onBackPressed();
+        }
+    }
 
     @Override
     protected void onResume() {
@@ -86,15 +92,15 @@ public class HomeActivity extends AppCompatActivity {
      * @param fragmentToShow the fragment to show.
      */
     void showFragment(FragmentReceiver fragmentToShow) {
-        fragmentDisplayed = fragmentToShow;
         Fragment fragment = (Fragment) fragmentToShow;
         // Insert the fragment by replacing any existing fragment
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.home_fragment_container, fragment)
+                .replace(R.id.home_fragment_container, fragment).hide((Fragment) fragmentDisplayed)
                 .addToBackStack(null)
                 .commit();
-        Log.d(TAG, "showFragment - called with : " + fragmentToShow);
+        fragmentDisplayed = fragmentToShow;
+        Log.d(TAG, "showFragment - called with : " + fragmentToShow + " " + ((Fragment) fragmentDisplayed).isVisible());
     }
 
     /**
