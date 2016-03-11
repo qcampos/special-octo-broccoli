@@ -12,10 +12,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import notification_security.upem.fr.securitynotification.home.FragmentReceiver.BaseFragmentReceiver;
-import notification_security.upem.fr.securitynotification.network.ProtocolConstants;
+import java.util.ArrayList;
+
 import notification_security.upem.fr.securitynotification.R;
+import notification_security.upem.fr.securitynotification.geolocalisation.Position;
+import notification_security.upem.fr.securitynotification.home.FragmentReceiver.BaseFragmentReceiver;
 import notification_security.upem.fr.securitynotification.network.NetworkService;
+import notification_security.upem.fr.securitynotification.network.ProtocolConstants;
 
 import static notification_security.upem.fr.securitynotification.ViewUtilities.showShortToast;
 
@@ -53,7 +56,12 @@ public class ConnectionFragment extends BaseFragmentReceiver {
     public void performNetworkRequest(HomeActivity homeActivity, String... params) {
         String login = params[0];
         String pin = params[1];
-        NetworkService.startConnectAction(homeActivity, login, pin);
+        ArrayList<Position> list = new ArrayList<>();
+        list.add(new Position(1, 1));
+        list.add(new Position(2, 2));
+        list.add(new Position(3, 3));
+        list.add(new Position(4, 4));
+        NetworkService.startConnectAction(homeActivity, login, pin, list);
     }
 
     @Override

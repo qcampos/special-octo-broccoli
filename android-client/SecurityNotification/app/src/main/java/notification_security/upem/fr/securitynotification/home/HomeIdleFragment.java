@@ -14,6 +14,7 @@ import android.widget.Button;
 import notification_security.upem.fr.securitynotification.R;
 import notification_security.upem.fr.securitynotification.geolocalisation.Position;
 import notification_security.upem.fr.securitynotification.home.FragmentReceiver.BaseFragmentReceiver;
+import notification_security.upem.fr.securitynotification.map.MapsActivity;
 import notification_security.upem.fr.securitynotification.map.UrgencyMapActivity;
 import notification_security.upem.fr.securitynotification.network.NetworkService;
 import notification_security.upem.fr.securitynotification.network.ProtocolConstants;
@@ -136,7 +137,7 @@ public class HomeIdleFragment extends BaseFragmentReceiver {
         btUrgencyMap.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getHomeActivity(), UrgencyMapActivity.class);
+                Intent intent = new Intent(getHomeActivity(), MapsActivity.class);
                 startActivity(intent);
             }
         });

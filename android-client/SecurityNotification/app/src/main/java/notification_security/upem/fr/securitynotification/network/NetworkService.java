@@ -6,12 +6,17 @@ import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+
 import notification_security.upem.fr.securitynotification.geolocalisation.Position;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
- * <p/>
+ * <p>
  * helper methods.
  */
 public class NetworkService extends IntentService {
@@ -72,13 +77,15 @@ public class NetworkService extends IntentService {
      * @param context the context invoking this method.
      * @param logging the logging to connect the app.
      * @param pin     the pin associated with the logging to connect the app.
+     * @param list
      * @see IntentService
      */
-    public static void startConnectAction(Context context, String logging, String pin) {
+    public static void startConnectAction(Context context, String logging, String pin, ArrayList<Position> list) {
         Intent intent = new Intent(context, NetworkService.class);
         intent.setAction(ACTION_CONNECT);
         intent.putExtra(EXTRA_CONNECT_LOGGING, logging);
         intent.putExtra(EXTRA_CONNECT_PIN, pin);
+        intent.putExtra("list", list);
         context.startService(intent);
     }
 

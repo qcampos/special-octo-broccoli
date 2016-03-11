@@ -130,7 +130,7 @@ public class HomeActivity extends AppCompatActivity {
                 Log.e(TAG, "onReceive - action not corresponding to current fragment : " + action);
                 return;
             }
-            // TODO if we receive an urgent map action when we are elsewhere, we must print it (perhaps in the scroll bar).
+            // TODO if we receive an urgent zfdazd&é action when we are elsewhere, we must print it (perhaps in the scroll bar).
             fragmentDisplayed.onReceiveNetworkIntent(intent);
         }
     }

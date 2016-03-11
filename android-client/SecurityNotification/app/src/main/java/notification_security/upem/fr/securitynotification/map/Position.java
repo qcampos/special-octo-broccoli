@@ -1,4 +1,4 @@
-package notification_security.upem.fr.securitynotification.geolocalisation;
+package notification_security.upem.fr.securitynotification.map;
 
 import java.io.Serializable;
 
@@ -8,8 +8,8 @@ import java.io.Serializable;
  */
 public class Position implements Serializable {
 
-    private final double latitude;
-    private final double longitude;
+    public final double latitude;
+    public final double longitude;
     // Used if the position is bound to a specific id.
     // For example, if we clik on the UrgenceMap, the position clicked
     // Will be bound with a specific id which is represented here.
@@ -29,11 +29,8 @@ public class Position implements Serializable {
         this.hasVoted = hasVoted;
     }
 
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
+    @Override
+    public String toString() {
+        return "[lat : " + latitude + " , longitude : " + longitude + " ]";
     }
 }
