@@ -136,6 +136,7 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
 
         LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(new LatLng(47, 2.5)).title("Major alert")).setSnippet("oh mon snippet");
+        mMap.addMarker(new MarkerOptions().position(sydney).title("Minor alert"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 12));
 
     }
