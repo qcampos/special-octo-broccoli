@@ -163,6 +163,9 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
         moveCamera(position);
     }
 
+    /**
+     * create a  dialog box
+     */
     public void createDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setPositiveButton("Je m'y trouve", new DialogInterface.OnClickListener() {
@@ -172,7 +175,7 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
         });
         builder.setNegativeButton("Fausse alerte", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                Log.d(TAG, "User cancelled the dialog");
+                Log.d(TAG, "User cancelled");
             }
         });
 
