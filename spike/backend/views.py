@@ -486,8 +486,9 @@ def jsonAlertRepr(alert, user):
         "author": "{} {}".format(alert.author.first_name, alert.author.last_name),
         "long": str(alert.alert_position.x),
         "lat": str(alert.alert_position.y),
-        "score": str(alert.getScore()),
-        "distance": alert.distance(user.last_position)
+        "score": alert.getScore(),
+        "distance": alert.distance(user.last_position),
+        "hasVoted": len(alert.vote_set.filter(user=user)) > 0,
     }
 
 
