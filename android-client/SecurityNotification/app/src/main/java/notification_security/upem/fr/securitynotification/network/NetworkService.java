@@ -45,8 +45,9 @@ public class NetworkService extends IntentService {
     private static final String ACTION_STOP_ALERT = "fr.upem.securitynotification.network.action.STOP_ALERT";
     public static final String ACTION_STOP_ALERT_RES = "fr.upem.securitynotification.network.action.STOP_ALERT_RES";
     /*_______ Make your extras for the factory _______*/
-
-
+    private static final String ACTION_GET_ALERT_LIST = "fr.upem.securitynotification.network.action.GET_ALERT_LIST";
+    public static final String ACTION_GET_ALERT_LIST_RES = "fr.upem.securitynotification.network.action.GET_ALERT_LIST_RES";
+    public static final String EXTRA_ALERT_LIST = "fr.upem.securitynotification.network.action";
     private boolean accessActivityDirectly = false;
 
     public NetworkService() {
@@ -129,6 +130,14 @@ public class NetworkService extends IntentService {
         context.startService(intent);
     }
 
+    public static void startAskAlertList(Context context, Position position){
+        Intent intent = new Intent(context, NetworkService.class);
+        intent.setAction(ACTION_GET_ALERT_LIST);
+        intent.putExtra("position",position);
+        Log.d(TAG, "service get list alert started");
+        context.startService(intent);
+    }
+
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
@@ -157,7 +166,22 @@ public class NetworkService extends IntentService {
                     sendLocalBroadcast(localIntent);
 
                     break;
-
+                case ACTION_GET_ALERT_LIST:
+                    Intent restAlertListIntent = new Intent(ACTION_GET_ALERT_LIST_RES);
+                    Position userPosition = intent.getParcelableExtra("position");
+                    double userLat = userPosition.getLatitude();
+                    double userLng = userPosition.getLongitude();
+                    ArrayList<Position> positions = new ArrayList<>();
+                    positions.add(new Position(userLat, userLng + 0.1 , 1, false));
+                    positions.add(new Position(userLat, userLng - 0.1, 2, false));
+                    positions.add(new Position(userLat + 0.05, userLng + 0.1 , 3, false));
+                    positions.add(new Position(userLat - 0.09, userLng - 0.1, 4, false));
+                    positions.add(new Position(userLat + 0.1, userLng , 5, false));
+                    positions.add(new Position(userLat - 0.1, userLng, 6, false));
+                    restAlertListIntent.putParcelableArrayListExtra(EXTRA_ALERT_LIST, positions);
+                    sendLocalBroadcast(restAlertListIntent);
+                    Log.d(TAG, "size" + positions.size() );
+                    break;
                 default:
                     Log.e(TAG, "onHandleIntent error in communication protocol.");
                     break;
@@ -185,4 +209,6 @@ public class NetworkService extends IntentService {
     private void sendLocalBroadcast(Intent intent) {
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
+
+
 }
