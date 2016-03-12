@@ -1,6 +1,8 @@
 package notification_security.upem.fr.securitynotification.home;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -8,12 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import notification_security.upem.fr.securitynotification.R;
 import notification_security.upem.fr.securitynotification.home.FragmentReceiver.BaseFragmentReceiver;
 import notification_security.upem.fr.securitynotification.network.NetworkService;
+import notification_security.upem.fr.securitynotification.network.ProtocolConstants;
 
 import static notification_security.upem.fr.securitynotification.ViewUtilities.showShortToast;
 
@@ -58,8 +59,16 @@ public class HomeAlertedFragment extends BaseFragmentReceiver {
             stopWaitingNetworkResult();
             return;
         }
-        // Correct informations. We can pass to the HomeIdleFragment.
+        // Correct informations. We can deactivate the alert preference and pass to the HomeIdleFragment.
+        deactivateAlertInPreferences();
         homeActivity.showFragment(new HomeIdleFragment());
+    }
+
+    private void deactivateAlertInPreferences() {
+        SharedPreferences preferences = getHomeActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(ProtocolConstants.IS_ALERTING_KEY, false);
+        editor.commit();
     }
 
     @Override

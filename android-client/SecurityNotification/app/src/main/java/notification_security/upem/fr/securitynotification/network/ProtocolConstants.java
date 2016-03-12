@@ -13,4 +13,5 @@ public class ProtocolConstants {
     public static final int DEFAULT_RADIUS = RADIUS1;
     // For preferences.
     public static final String RADIUS_KEY = "RADIUS";
+    public static final String IS_ALERTING_KEY = "IS_ALERTED";
 }
