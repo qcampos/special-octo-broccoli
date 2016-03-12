@@ -77,15 +77,13 @@ public class NetworkService extends IntentService {
      * @param context the context invoking this method.
      * @param logging the logging to connect the app.
      * @param pin     the pin associated with the logging to connect the app.
-     * @param list
      * @see IntentService
      */
-    public static void startConnectAction(Context context, String logging, String pin, ArrayList<Position> list) {
+    public static void startConnectAction(Context context, String logging, String pin) {
         Intent intent = new Intent(context, NetworkService.class);
         intent.setAction(ACTION_CONNECT);
         intent.putExtra(EXTRA_CONNECT_LOGGING, logging);
         intent.putExtra(EXTRA_CONNECT_PIN, pin);
-        intent.putExtra("list", list);
         context.startService(intent);
     }
 

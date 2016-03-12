@@ -37,19 +37,10 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home);
         // Our receiver, dispatching answers from the network service to our fragments.
         serviceReceiver = new NetworkServiceReceiver();
-        // Getting in preferences if an urgence state was declared lastly.
-        if (isAlerting()) {
-            fragmentDisplayed = new HomeAlertedFragment();
-        } else {
-            fragmentDisplayed = new ConnectionFragment();
-        }
-        showFirstFragment(fragmentDisplayed);
+        // Shows the starting fragment.
+        showFirstFragment(fragmentDisplayed = new SplashFragment());
     }
 
-    private boolean isAlerting() {
-        SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
-        return preferences.getBoolean(ProtocolConstants.IS_ALERTING_KEY, false);
-    }
 
     @Override
     public void onBackPressed() {

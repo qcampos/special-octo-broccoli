@@ -14,4 +14,7 @@ public class ProtocolConstants {
     // For preferences.
     public static final String RADIUS_KEY = "RADIUS";
     public static final String IS_ALERTING_KEY = "IS_ALERTED";
+    public static final String LOGIN = "LOGIN";
+    public static final String PIN = "PIN";
+    public static final String UNSET_PREFERENCE = "__UNSET__";
 }
