@@ -1,7 +1,9 @@
 package notification_security.upem.fr.securitynotification.home;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -35,6 +37,8 @@ public class ConnectionFragment extends BaseFragmentReceiver {
     private EditText etPin;
     private Button btConnect;
     private TextView tvNewAccount;
+    private String logging;
+    private String pin;
 
     @Nullable
     @Override
@@ -56,12 +60,7 @@ public class ConnectionFragment extends BaseFragmentReceiver {
     public void performNetworkRequest(HomeActivity homeActivity, String... params) {
         String login = params[0];
         String pin = params[1];
-        ArrayList<Position> list = new ArrayList<>();
-        list.add(new Position(1, 1));
-        list.add(new Position(2, 2));
-        list.add(new Position(3, 3));
-        list.add(new Position(4, 4));
-        NetworkService.startConnectAction(homeActivity, login, pin, list);
+        NetworkService.startConnectAction(homeActivity, login, pin);
     }
 
     @Override
@@ -79,6 +78,7 @@ public class ConnectionFragment extends BaseFragmentReceiver {
             return;
         }
         // Correct informations. We can pass to the HomeIdleFragment.
+        saveLoginIds();
         homeActivity.showFragment(new HomeIdleFragment());
     }
 
@@ -135,8 +135,8 @@ public class ConnectionFragment extends BaseFragmentReceiver {
             @Override
             public void onClick(View v) {
                 // Retrieving logging and pin fields.
-                String logging = etLogin.getText().toString().trim();
-                String pin = etPin.getText().toString().trim();
+                logging = etLogin.getText().toString().trim();
+                pin = etPin.getText().toString().trim();
                 Log.v(TAG, "Connect button onClick (logging : " + logging + " - pin : " + pin + ")");
                 // Checking if fields are correct, aborting if not.
                 if (!validateTFInputs(logging, pin)) return;
@@ -181,5 +181,13 @@ public class ConnectionFragment extends BaseFragmentReceiver {
             return false;
         }
         return true;
+    }
+
+    private void saveLoginIds() {
+        SharedPreferences preferences = getHomeActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(ProtocolConstants.LOGIN, logging);
+        editor.putString(ProtocolConstants.PIN, pin);
+        editor.commit();
     }
 }

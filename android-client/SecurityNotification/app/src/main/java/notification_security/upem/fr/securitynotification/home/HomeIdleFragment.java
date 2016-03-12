@@ -2,6 +2,7 @@ package notification_security.upem.fr.securitynotification.home;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -73,7 +74,15 @@ public class HomeIdleFragment extends BaseFragmentReceiver {
             return;
         }
         // Correct informations. We can pass to the HomeIdleFragment.
+        activateAlertInPreferences();
         homeActivity.showFragment(new HomeAlertedFragment());
+    }
+
+    private void activateAlertInPreferences() {
+        SharedPreferences preferences = getHomeActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(ProtocolConstants.IS_ALERTING_KEY, true);
+        editor.commit();
     }
 
     @Override
