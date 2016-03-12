@@ -78,24 +78,13 @@ public class SplashFragment extends FragmentReceiver.BaseFragmentReceiver {
     private void initializeAutoConnection() {
         final HomeActivity homeActivity = getHomeActivity();
         // If an automatic connection can be performed, doing it.
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                if (autoConnect()) {
-                    // Asking for manual connection.
-                    homeActivity.showFragment(new ConnectionFragment());
-                    return;
-                }
-                // Requesting automatic connection.
-                requestNetworkAction();
-            }
-        }).start();
+        if (autoConnect()) {
+            // Asking for manual connection.
+            homeActivity.showFragment(new ConnectionFragment());
+            return;
+        }
+        // Requesting automatic connection.
+        requestNetworkAction();
     }
 
     private boolean autoConnect() {

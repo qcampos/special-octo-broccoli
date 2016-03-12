@@ -5,7 +5,6 @@
     android:background="@color/main_blue"
     tools:context="notification_security.upem.fr.securitynotification.home.SplashFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -18,12 +17,12 @@
         android:id="@+id/textView" />
 
     <ProgressBar
-        style="?android:attr/progressBarStyleLarge"
+        style="@style/Widget.AppCompat.ProgressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/progressBar"
-        android:layout_centerVertical="true"
         android:indeterminate="true"
+        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
 
 
