@@ -1,6 +1,7 @@
 package notification_security.upem.fr.securitynotification.network;
 
 import android.app.IntentService;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
@@ -16,7 +17,7 @@ import notification_security.upem.fr.securitynotification.geolocalisation.Positi
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
- * <p>
+ * <p/>
  * helper methods.
  */
 public class NetworkService extends IntentService {
@@ -47,7 +48,15 @@ public class NetworkService extends IntentService {
     /*_______ Make your extras for the factory _______*/
     private static final String ACTION_GET_ALERT_LIST = "fr.upem.securitynotification.network.action.GET_ALERT_LIST";
     public static final String ACTION_GET_ALERT_LIST_RES = "fr.upem.securitynotification.network.action.GET_ALERT_LIST_RES";
-    public static final String EXTRA_ALERT_LIST = "fr.upem.securitynotification.network.action";
+    public static final String EXTRA_ALERT_LIST = "fr.upem.securitynotification.network.extra.action.ALERT_LIST";
+    /*_______ Make your extras for the factory _______*/
+    private static final String ACTION_VALIDATE = "fr.upem.securitynotification.network.action.VALIDATE";
+    public static final String ACTION_VALIDATE_RES = "fr.upem.securitynotification.network.action.VALIDATE_RES";
+    public static final String EXTRA_VALIDATE_ALERT_ID = "fr.upem.securitynotification.network.extra.action.ALERT_ID";
+    public static final String EXTRA_VALIDATE_IMHERE = "fr.upem.securitynotification.network.extra.action.IMHERE";
+    public static final String EXTRA_VALIDATE_ITSFAKE = "fr.upem.securitynotification.network.extra.action.ITSFAKE";
+    /*_______ Make your extras for the factory _______*/
+
     private boolean accessActivityDirectly = false;
 
     public NetworkService() {
@@ -128,10 +137,20 @@ public class NetworkService extends IntentService {
         context.startService(intent);
     }
 
-    public static void startAskAlertList(Context context, Position position){
+    public static void startAskAlertList(Context context, Position position) {
         Intent intent = new Intent(context, NetworkService.class);
         intent.setAction(ACTION_GET_ALERT_LIST);
-        intent.putExtra("position",position);
+        intent.putExtra("position", position);
+        Log.d(TAG, "service get list alert started");
+        context.startService(intent);
+    }
+
+    public static void startValidateAction(Context context, long alertId, boolean imHere, boolean itsFake) {
+        Intent intent = new Intent(context, NetworkService.class);
+        intent.setAction(ACTION_VALIDATE);
+        intent.putExtra(EXTRA_VALIDATE_ALERT_ID, alertId);
+        intent.putExtra(EXTRA_VALIDATE_IMHERE, imHere);
+        intent.putExtra(EXTRA_VALIDATE_ITSFAKE, itsFake);
         Log.d(TAG, "service get list alert started");
         context.startService(intent);
     }
@@ -164,21 +183,33 @@ public class NetworkService extends IntentService {
                     sendLocalBroadcast(localIntent);
 
                     break;
+                case ACTION_VALIDATE:
+                    long alertID = intent.getLongExtra(EXTRA_VALIDATE_ALERT_ID, -1);
+                    boolean imHere = intent.getBooleanExtra(EXTRA_VALIDATE_IMHERE, false);
+                    boolean itsFake = intent.getBooleanExtra(EXTRA_VALIDATE_ITSFAKE, false);
+                    // TODO check -1 id and discard it or return instant error on *_RES;
+                    Log.d(TAG, "handleValidate Action... for id " + alertID + " imHere : " + imHere + " itsFake : " + itsFake);
+                    localIntent = new Intent(action + "_RES");
+                    // Always put this boolean which tells us if everything went good, or if we
+                    // will have to process error fields.
+                    localIntent.putExtra(EXTRA_RES, true);
+                    sendLocalBroadcast(localIntent);
+                    break;
                 case ACTION_GET_ALERT_LIST:
                     Intent restAlertListIntent = new Intent(ACTION_GET_ALERT_LIST_RES);
                     Position userPosition = intent.getParcelableExtra("position");
                     double userLat = userPosition.getLatitude();
                     double userLng = userPosition.getLongitude();
                     ArrayList<Position> positions = new ArrayList<>();
-                    positions.add(new Position(userLat, userLng + 0.1 , 1, false));
+                    positions.add(new Position(userLat, userLng + 0.1, 1, false));
                     positions.add(new Position(userLat, userLng - 0.1, 2, false));
-                    positions.add(new Position(userLat + 0.05, userLng + 0.1 , 3, false));
+                    positions.add(new Position(userLat + 0.05, userLng + 0.1, 3, false));
                     positions.add(new Position(userLat - 0.09, userLng - 0.1, 4, false));
-                    positions.add(new Position(userLat + 0.1, userLng , 5, false));
+                    positions.add(new Position(userLat + 0.1, userLng, 5, false));
                     positions.add(new Position(userLat - 0.1, userLng, 6, false));
                     restAlertListIntent.putParcelableArrayListExtra(EXTRA_ALERT_LIST, positions);
                     sendLocalBroadcast(restAlertListIntent);
-                    Log.d(TAG, "size" + positions.size() );
+                    Log.d(TAG, "size" + positions.size());
                     break;
                 default:
                     Log.e(TAG, "onHandleIntent error in communication protocol.");
@@ -196,6 +227,7 @@ public class NetworkService extends IntentService {
      *                               a new notification, which will launch the view activity when it is clicked.
      * @see NetworkService#startChangeAccessAction(Context, boolean)
      */
+
     private void handleActionChangeAccess(boolean accessActivityDirectly) {
         Log.d(TAG, "handleActionChangeAccess receives new direct access : " + accessActivityDirectly);
         this.accessActivityDirectly = accessActivityDirectly;
@@ -207,6 +239,4 @@ public class NetworkService extends IntentService {
     private void sendLocalBroadcast(Intent intent) {
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
-
-
 }
