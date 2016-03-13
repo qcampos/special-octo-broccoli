@@ -1,6 +1,7 @@
 package notification_security.upem.fr.securitynotification.home;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
@@ -9,6 +10,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
@@ -35,9 +37,11 @@ public class AsyncGPSProvider extends AsyncTask<Void, Void, Position> implements
         public void onUpdatedPositionSuccess(Position position);
 
         public void onUpdatedPositionFailed();
+
+        void onPermissionFailed();
     }
 
-    private final Context context;
+    private final Activity context;
     private final AsyncGPSListener listener;
 
     // Inner fields.
@@ -45,7 +49,7 @@ public class AsyncGPSProvider extends AsyncTask<Void, Void, Position> implements
     private String bestProvider;
     private Position position;
 
-    public AsyncGPSProvider(Context context, AsyncGPSListener listener) {
+    public AsyncGPSProvider(Activity context, AsyncGPSListener listener) {
         this.context = context;
         this.listener = listener;
     }
@@ -53,13 +57,14 @@ public class AsyncGPSProvider extends AsyncTask<Void, Void, Position> implements
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        ViewUtilities.showShortToast(context, "Debug : Fetching position");
-        Log.d(TAG, "onPreExecute - Fetching position.");
-        if (initRequest()) {
+        Log.d(TAG, "Récupération de la position.");
+        if (!initRequest()) {
             cancel(true);
+            listener.onPermissionFailed();
             Log.e(TAG, "onPreExecute - init Failed.");
             return;
         }
+        ViewUtilities.showShortToast(context, "Debug : Fetching position");
         Log.d(TAG, "onPreExecute - preExecute finished.");
     }
 
@@ -71,7 +76,6 @@ public class AsyncGPSProvider extends AsyncTask<Void, Void, Position> implements
         criteria.setCostAllowed(false); // No monetary cost ? TODO put it in a parametrization ?
         criteria.setPowerRequirement(Criteria.NO_REQUIREMENT); // No requirements on features.
         bestProvider = locationManager.getBestProvider(criteria, false);
-
         // Using the GPS provider.
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             bestProvider = LocationManager.GPS_PROVIDER;
@@ -86,23 +90,22 @@ public class AsyncGPSProvider extends AsyncTask<Void, Void, Position> implements
             Log.d(TAG, "initRequest -  No GPS Available !");
             ViewUtilities.showShortToast(context, "Debug : No GPS Available ! "); // TODO set no transmissions.
         }
+
+        // Checking permissions.
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for Activity#requestPermissions for more details.
-            Log.d(TAG, "initRequest -   Error in permissions ACCESS.");
-            ViewUtilities.showLongToast(context, "Debug : Error in permissions ACCESS.");
-            return true;
+            ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            Log.d(TAG, "initRequest - requestPermission.");
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                return false;
+            }
+            Log.d(TAG, "initRequest - permission granted.");
         }
-        bestProvider = LocationManager.NETWORK_PROVIDER;
         Log.d(TAG, "initRequest - Permissions ok for provider : " + bestProvider);
         locationManager.requestLocationUpdates(bestProvider, 0, 0, this);
-        return false;
+        return true;
     }
 
 

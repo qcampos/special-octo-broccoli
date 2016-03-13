@@ -22,6 +22,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import java.util.HashMap;
 
 import notification_security.upem.fr.securitynotification.R;
+import notification_security.upem.fr.securitynotification.ViewUtilities;
 import notification_security.upem.fr.securitynotification.geolocalisation.Position;
 import notification_security.upem.fr.securitynotification.home.FragmentReceiver.BaseFragmentReceiver;
 import notification_security.upem.fr.securitynotification.map.GeoLocalisationServiceB;
@@ -191,5 +192,12 @@ public class HomeIdleFragment extends BaseFragmentReceiver implements AsyncGPSPr
     @Override
     public void onUpdatedPositionFailed() {
         // TODO handle error when retrieving by showing an error prompt. (With please retrieve).
+    }
+
+    @Override
+    public void onPermissionFailed() {
+        HomeActivity homeActivity = getHomeActivity();
+        homeActivity.showFragment(new HomeIdleFragment());
+        ViewUtilities.showShortToast(homeActivity, "Veuillez accepter la permission.");
     }
 }
