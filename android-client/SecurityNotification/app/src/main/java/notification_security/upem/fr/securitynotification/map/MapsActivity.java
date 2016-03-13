@@ -63,7 +63,6 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
     private final ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
             GeoLocalisationServiceB.LocalBinder binder = (GeoLocalisationServiceB.LocalBinder) service;
             geoLocalisationServiceB = binder.getService();
             geoLocalisationServiceB.subscribeLocationUpdate(MapsActivity.this, MapsActivity.this, 1);
@@ -135,6 +134,7 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
                     return false;
                 }
                 Position alertTargeted = markerIdToAlertID.get(marker.getId());
+                Log.d(TAG, "Alert targeted  " + alertTargeted.getId() +"has voted " + alertTargeted.isHasVoted() + " ");
                 AlertDialog dialog = createDialog(alertTargeted);
                 try {
                     dialog.setMessage(translateCoordinateToAdress(marker.getPosition()));
@@ -185,11 +185,15 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
             builder.setPositiveButton("Je m'y trouve", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     Log.d(TAG, "User clicked OK button number " + alertId);
+                    alert.setHasVoted(true);
+                    //TODO call NetworkService
                 }
             });
             builder.setNegativeButton("Fausse alerte", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-                    Log.d(TAG, "User cancelled number " + alertId);
+                    Log.d(TAG, "User cancelled number " + alertId + " " + alert.getId());
+                    alert.setHasVoted(true);
+                    //TODO callNetworkService
                 }
             });
         }

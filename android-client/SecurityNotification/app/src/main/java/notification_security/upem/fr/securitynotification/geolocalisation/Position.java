@@ -19,7 +19,7 @@ public class Position implements Parcelable {
     private final long id;
     // Same here, the has voted is used when an instance of position
     // handles the data bound to a position on the UrgenceMap.
-    private final boolean hasVoted;
+    private boolean hasVoted;
 
     public Position(double latitude, double longitude) {
         this(latitude, longitude, -1L, false);
@@ -57,7 +57,7 @@ public class Position implements Parcelable {
     }
 
     public void setHasVoted(boolean hasVoted){
-
+        this.hasVoted = hasVoted;
     }
 
     public static final Creator<Position> CREATOR = new Creator<Position>() {
