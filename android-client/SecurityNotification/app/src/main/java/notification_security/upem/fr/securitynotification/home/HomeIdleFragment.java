@@ -1,9 +1,13 @@
 package notification_security.upem.fr.securitynotification.home;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,9 +16,15 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.maps.SupportMapFragment;
+
+import java.util.HashMap;
+
 import notification_security.upem.fr.securitynotification.R;
 import notification_security.upem.fr.securitynotification.geolocalisation.Position;
 import notification_security.upem.fr.securitynotification.home.FragmentReceiver.BaseFragmentReceiver;
+import notification_security.upem.fr.securitynotification.map.GeoLocalisationServiceB;
 import notification_security.upem.fr.securitynotification.map.MapsActivity;
 import notification_security.upem.fr.securitynotification.map.UrgencyMapActivity;
 import notification_security.upem.fr.securitynotification.network.NetworkService;
@@ -26,7 +36,7 @@ import static notification_security.upem.fr.securitynotification.ViewUtilities.s
 /**
  * Fragment handling home in idle state, logic.
  */
-public class HomeIdleFragment extends BaseFragmentReceiver {
+public class HomeIdleFragment extends BaseFragmentReceiver implements AsyncGPSProvider.AsyncGPSListener {
 
     // The logging TAG.
     private static final String TAG = HomeIdleFragment.class.getSimpleName();
@@ -38,8 +48,10 @@ public class HomeIdleFragment extends BaseFragmentReceiver {
     private Button btAlert;
     private Button btParameter;
     private Button btUrgencyMap;
+    private Position position;
 
     private int count = CLICK_NUMBER;
+    private AsyncGPSProvider asyncGPSProvider;
 
     @Nullable
     @Override
@@ -54,6 +66,8 @@ public class HomeIdleFragment extends BaseFragmentReceiver {
         setLocalViews();
         // Setting listeners.
         setClickListeners();
+        // The gps asyncGPSProvider.
+        asyncGPSProvider = new AsyncGPSProvider(getActivity(), this);
     }
 
     @Override
@@ -61,7 +75,8 @@ public class HomeIdleFragment extends BaseFragmentReceiver {
         // TODO retrieve good position.
         int radius = homeActivity.getPreferences(Context.MODE_PRIVATE)
                 .getInt(ProtocolConstants.RADIUS_KEY, ProtocolConstants.DEFAULT_RADIUS);
-        NetworkService.startAddAlertAction(homeActivity, new Position(7777, 7777), Integer.toString(radius));
+        Log.d(TAG, "performNetworkRequest - requesting with position : " + position.getLatitude() + " " + position.getLongitude());
+        NetworkService.startAddAlertAction(homeActivity, position, Integer.toString(radius));
     }
 
     @Override
@@ -130,7 +145,8 @@ public class HomeIdleFragment extends BaseFragmentReceiver {
             public void onClick(View v) {
                 count--;
                 if (count <= 0) {
-                    requestNetworkAction();
+                    disableFields(); // TODO don't disable all fields here, please allows the cancel.
+                    asyncGPSProvider.execute();
                     return;
                 }
                 updateAlertCount();
@@ -164,5 +180,16 @@ public class HomeIdleFragment extends BaseFragmentReceiver {
                 getHomeActivity().showFragment(new ParameterFragment());
             }
         });
+    }
+
+    @Override
+    public void onUpdatedPositionSuccess(Position position) {
+        this.position = position;
+        requestNetworkAction();
+    }
+
+    @Override
+    public void onUpdatedPositionFailed() {
+        // TODO handle error when retrieving by showing an error prompt. (With please retrieve).
     }
 }

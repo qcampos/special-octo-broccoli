@@ -153,7 +153,7 @@ public class GeoLocalisationServiceB extends Service implements GoogleApiClient.
     }
 
     public class LocalBinder extends Binder {
-        GeoLocalisationServiceB getService() {
+        public GeoLocalisationServiceB getService() {
             return GeoLocalisationServiceB.this;
         }
     }
