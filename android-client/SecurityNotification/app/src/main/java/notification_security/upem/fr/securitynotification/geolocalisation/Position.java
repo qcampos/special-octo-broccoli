@@ -1,12 +1,15 @@
 package notification_security.upem.fr.securitynotification.geolocalisation;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.Serializable;
 
 /**
  * A GPS Position which is the only java object the vue and the NetworkService
  * exchange.
  */
-public class Position implements Serializable {
+public class Position implements Parcelable {
 
     private final double latitude;
     private final double longitude;
@@ -16,7 +19,7 @@ public class Position implements Serializable {
     private final long id;
     // Same here, the has voted is used when an instance of position
     // handles the data bound to a position on the UrgenceMap.
-    private final boolean hasVoted;
+    private boolean hasVoted;
 
     public Position(double latitude, double longitude) {
         this(latitude, longitude, -1L, false);
@@ -29,11 +32,56 @@ public class Position implements Serializable {
         this.hasVoted = hasVoted;
     }
 
+    protected Position(Parcel in) {
+        latitude = in.readDouble();
+        longitude = in.readDouble();
+        id = in.readLong();
+        hasVoted = in.readByte() != 0;
+    }
+
+
     public double getLatitude() {
         return latitude;
     }
 
     public double getLongitude() {
         return longitude;
+    }
+
+    public long getId(){
+        return id;
+    }
+
+    public boolean isHasVoted() {
+        return hasVoted;
+    }
+
+    public void setHasVoted(boolean hasVoted){
+        this.hasVoted = hasVoted;
+    }
+
+    public static final Creator<Position> CREATOR = new Creator<Position>() {
+        @Override
+        public Position createFromParcel(Parcel in) {
+            return new Position(in);
+        }
+
+        @Override
+        public Position[] newArray(int size) {
+            return new Position[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeDouble(latitude);
+        dest.writeDouble(longitude);
+        dest.writeLong(id);
+        dest.writeByte((byte) (hasVoted ? 1 : 0));
     }
 }

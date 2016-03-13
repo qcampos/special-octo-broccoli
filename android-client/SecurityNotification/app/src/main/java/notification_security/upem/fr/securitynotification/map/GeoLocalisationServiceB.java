@@ -76,7 +76,9 @@ public class GeoLocalisationServiceB extends Service implements GoogleApiClient.
     }
 
     private void requestUpdateLocation(Activity activity, LocationListener listener, int nbUpdate){
+        Log.d(TAG, "requested");
         if (ActivityCompat.checkSelfPermission(GeoLocalisationServiceB.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG,"shit");
             return ;
         }
         LocationRequest mLocationRequest = createLocationRequest(nbUpdate);
@@ -136,6 +138,7 @@ public class GeoLocalisationServiceB extends Service implements GoogleApiClient.
 
     @Override
     public void onConnected(Bundle bundle) {
+        Log.d(TAG, "connected");
         for(Runnable request : requestWaitingConnectionQueue){
             request.run();
         }
