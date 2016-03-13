@@ -186,14 +186,14 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
                 public void onClick(DialogInterface dialog, int id) {
                     Log.d(TAG, "User clicked OK button number " + alertId);
                     alert.setHasVoted(true);
-                    //TODO call NetworkService
+                    NetworkService.startValidateAction(MapsActivity.this, alertId, true, false);
                 }
             });
             builder.setNegativeButton("Fausse alerte", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     Log.d(TAG, "User cancelled number " + alertId + " " + alert.getId());
                     alert.setHasVoted(true);
-                    //TODO callNetworkService
+                    NetworkService.startValidateAction(MapsActivity.this, alertId, false, true);
                 }
             });
         }
