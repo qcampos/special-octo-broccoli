@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
@@ -15,7 +14,6 @@ import android.util.Log;
 
 import notification_security.upem.fr.securitynotification.R;
 import notification_security.upem.fr.securitynotification.network.NetworkService;
-import notification_security.upem.fr.securitynotification.network.ProtocolConstants;
 
 /**
  * Home activity. Performs life cycle control and binds other fragments.
