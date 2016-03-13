@@ -167,7 +167,7 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
     @Override
     public void onLocationChanged(Location location) {
         Position position = new Position(location.getLatitude(),location.getLongitude());
-        Log.d(TAG, position.toString());
+        Log.d(TAG, "New position : position.toString()");
         moveCamera(position);
         NetworkService.startAskAlertList(this, position);
         mMap.setMyLocationEnabled(true);
