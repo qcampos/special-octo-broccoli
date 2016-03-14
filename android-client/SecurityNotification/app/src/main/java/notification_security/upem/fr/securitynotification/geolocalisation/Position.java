@@ -16,16 +16,16 @@ public class Position implements Parcelable {
     // Used if the position is bound to a specific id.
     // For example, if we clik on the UrgenceMap, the position clicked
     // Will be bound with a specific id which is represented here.
-    private final long id;
+    private final String id;
     // Same here, the has voted is used when an instance of position
     // handles the data bound to a position on the UrgenceMap.
     private boolean hasVoted;
 
     public Position(double latitude, double longitude) {
-        this(latitude, longitude, -1L, false);
+        this(latitude, longitude, "0", false);
     }
 
-    public Position(double latitude, double longitude, long id, boolean hasVoted) {
+    public Position(double latitude, double longitude, String id, boolean hasVoted) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.id = id;
@@ -35,7 +35,7 @@ public class Position implements Parcelable {
     protected Position(Parcel in) {
         latitude = in.readDouble();
         longitude = in.readDouble();
-        id = in.readLong();
+        id = in.readString();
         hasVoted = in.readByte() != 0;
     }
 
@@ -48,7 +48,7 @@ public class Position implements Parcelable {
         return longitude;
     }
 
-    public long getId(){
+    public String getId(){
         return id;
     }
 
@@ -81,7 +81,7 @@ public class Position implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeDouble(latitude);
         dest.writeDouble(longitude);
-        dest.writeLong(id);
+        dest.writeString(id);
         dest.writeByte((byte) (hasVoted ? 1 : 0));
     }
 }

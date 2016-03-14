@@ -24,6 +24,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -47,8 +48,9 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
     private GeoLocalisationServiceB geoLocalisationServiceB;
     private boolean mBound;
     private NetworkServiceReceiver serviceReceiver;
-    private Map<String, Position> markerIdToAlertID;
-
+    private HashMap<String, Position> markerIdToAlertID;
+    private List<Runnable> toDoOnMapReady;
+    private boolean localisationNeeded;
     private final ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -64,14 +66,35 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
         }
     };
 
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         markerIdToAlertID = new HashMap<>();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        if(savedInstanceState != null){
+            toDoOnMapReady = new ArrayList<>();
+            toDoOnMapReady.add(new Runnable() {
+                @Override
+                public void run() {
+                    double lat = savedInstanceState.getDouble("lat");
+                    double lng = savedInstanceState.getDouble("lng");
+                    float zoom = savedInstanceState.getFloat("zoom");
+                    moveCamera(lat, lng, zoom);
+                    HashMap<String, Position> positions = (HashMap<String, Position>)savedInstanceState.getSerializable("positions");
+                    for(Position position : positions.values()){
+                        addMarker(position);
+                    }
+                }
+            });
+            localisationNeeded = false;
+        }
+        else{
+            localisationNeeded = true;
+        }
         serviceReceiver = new NetworkServiceReceiver();
     }
 
@@ -79,30 +102,44 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
     protected void onStart() {
         super.onStart();
         bindGeoLocalisationService();
+        registerNetworkServiceReceiver();
         Log.d(TAG, "onstrat");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        registerNetworkServiceReceiver();
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterNetworkServiceReceiver();
+
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         unBindGeoLocalisationService();
+        unregisterNetworkServiceReceiver();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable("positions", markerIdToAlertID);
+        CameraPosition cameraPosition = mMap.getCameraPosition();
+        outState.putDouble("lat", cameraPosition.target.latitude);
+        outState.putDouble("lng", cameraPosition.target.longitude);
+        outState.putFloat("zoom", cameraPosition.zoom);
     }
 
     private void bindGeoLocalisationService(){
-        Intent intent = new Intent(this, GeoLocalisationServiceB.class);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        if(localisationNeeded){
+            Intent intent = new Intent(this, GeoLocalisationServiceB.class);
+            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        }
     }
 
     private void unBindGeoLocalisationService(){
@@ -134,13 +171,20 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
                 return true;
             }
         });
+        mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        if(toDoOnMapReady != null){
+            for(Runnable toDo : toDoOnMapReady){
+                toDo.run();
+            }
+        }
     }
 
     private void addMarker(Position position) {
         Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(position.getLatitude(), position.getLongitude())));
         marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
         markerIdToAlertID.put(marker.getId(), position);
-        Log.d(TAG,"Adding marker " + position.getLatitude() + " " + position.getLongitude());
+        Log.d(TAG, "Adding marker " + position.getLatitude() + " " + position.getLongitude());
     }
 
     private void addMarkers(List<Position> positions) {
@@ -153,21 +197,23 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(position.getLatitude(), position.getLongitude()), 11));
     }
 
+    private void moveCamera(double lat, double lng, float zoom){
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), zoom));
+    }
+
     @Override
     public void onLocationChanged(Location location) {
-        Position position = new Position(location.getLatitude(),location.getLongitude());
+        Position position = new Position(location.getLatitude(), location.getLongitude());
         Log.d(TAG, "New position : position.toString()");
         moveCamera(position);
         NetworkService.startAskAlertList(this, position);
-        mMap.setMyLocationEnabled(true);
-        mMap.getUiSettings().setMyLocationButtonEnabled(true);
     }
 
     /**
      * create a  dialog box
      */
     private AlertDialog createDialog(final Position alert) {
-        final long alertId = alert.getId();
+        final String alertId = alert.getId();
         boolean showButtons = !alert.isHasVoted();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         if(showButtons){

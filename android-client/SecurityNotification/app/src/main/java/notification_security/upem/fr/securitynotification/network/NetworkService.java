@@ -145,7 +145,7 @@ public class NetworkService extends IntentService {
         context.startService(intent);
     }
 
-    public static void startValidateAction(Context context, long alertId, boolean imHere, boolean itsFake) {
+    public static void startValidateAction(Context context, String alertId, boolean imHere, boolean itsFake) {
         Intent intent = new Intent(context, NetworkService.class);
         intent.setAction(ACTION_VALIDATE);
         intent.putExtra(EXTRA_VALIDATE_ALERT_ID, alertId);
@@ -201,12 +201,12 @@ public class NetworkService extends IntentService {
                     double userLat = userPosition.getLatitude();
                     double userLng = userPosition.getLongitude();
                     ArrayList<Position> positions = new ArrayList<>();
-                    positions.add(new Position(userLat, userLng + 0.1, 1, false));
-                    positions.add(new Position(userLat, userLng - 0.1, 2, false));
-                    positions.add(new Position(userLat + 0.05, userLng + 0.1, 3, false));
-                    positions.add(new Position(userLat - 0.09, userLng - 0.1, 4, false));
-                    positions.add(new Position(userLat + 0.1, userLng, 5, false));
-                    positions.add(new Position(userLat - 0.1, userLng, 6, false));
+                    positions.add(new Position(userLat, userLng + 0.1, "1", false));
+                    positions.add(new Position(userLat, userLng - 0.1, "2", false));
+                    positions.add(new Position(userLat + 0.05, userLng + 0.1, "3", false));
+                    positions.add(new Position(userLat - 0.09, userLng - 0.1, "4", false));
+                    positions.add(new Position(userLat + 0.1, userLng, "5", false));
+                    positions.add(new Position(userLat - 0.1, userLng, "6", false));
                     restAlertListIntent.putParcelableArrayListExtra(EXTRA_ALERT_LIST, positions);
                     sendLocalBroadcast(restAlertListIntent);
                     Log.d(TAG, "size" + positions.size());
