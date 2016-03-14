@@ -1,6 +1,17 @@
 README
 =======
 
+Equipe
+------
+
+* Jefferson Mangue
+* Yann Bilissor
+* Quentin Campos
+* Anis Smail
+* Sylvestre Massalaz
+
+
+
 Organisation des sources
 ------------------------------
 
