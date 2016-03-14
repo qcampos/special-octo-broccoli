@@ -65,6 +65,13 @@ public class GeoLocalisationServiceB extends Service implements GoogleApiClient.
         Log.d(TAG, "service destroyed");
     }
 
+    /**
+     * When you call this method, you will receive nbUpdate times the user location on the onLocationUpdate method
+     * of listener.
+     * @param activity activity currently running foreground
+     * @param listener location update listener
+     * @param nbUpdate number update requested
+     */
     public void subscribeLocationUpdate(final Activity activity, final LocationListener listener, final int nbUpdate) {
         if (mGoogleApiClient.isConnected()) {
             requestUpdateLocation(activity, listener, nbUpdate);
