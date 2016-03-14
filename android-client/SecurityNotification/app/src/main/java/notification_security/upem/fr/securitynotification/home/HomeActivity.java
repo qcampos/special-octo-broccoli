@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import notification_security.upem.fr.securitynotification.R;
+import notification_security.upem.fr.securitynotification.ViewUtilities;
 import notification_security.upem.fr.securitynotification.network.NetworkService;
 
 /**
@@ -134,6 +135,9 @@ public class HomeActivity extends AppCompatActivity {
             String action = intent.getAction();
             if (!fragmentDisplayed.getFilteredAction().equals(action)) {
                 Log.e(TAG, "onReceive - action not corresponding to current fragment : " + action);
+                if (action.equals(NetworkService.ACTION_GET_ALERT_LIST_RES)) {
+                    ViewUtilities.showLongToast(HomeActivity.this, "Une nouvelle alerte est apparue !");
+                }
                 return;
             }
             // TODO if we receive an urgent zfdazd&é action when we are elsewhere, we must print it (perhaps in the scroll bar).
