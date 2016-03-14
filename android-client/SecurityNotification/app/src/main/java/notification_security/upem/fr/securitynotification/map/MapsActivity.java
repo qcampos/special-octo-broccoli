@@ -18,10 +18,12 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -39,6 +41,8 @@ import java.util.List;
 import java.util.Locale;
 
 import notification_security.upem.fr.securitynotification.R;
+import notification_security.upem.fr.securitynotification.ViewUtilities;
+import notification_security.upem.fr.securitynotification.geolocalisation.GeoLocalisationServiceB;
 import notification_security.upem.fr.securitynotification.geolocalisation.Position;
 import notification_security.upem.fr.securitynotification.network.NetworkService;
 import notification_security.upem.fr.securitynotification.network.ProtocolConstants;
@@ -48,12 +52,11 @@ import notification_security.upem.fr.securitynotification.network.ProtocolConsta
  * When started the activity bind to the GeoLocalisationService and ask location, then
  * the activity ask NetworkService for alerts near, and display markers on their positions.
  */
-public class MapsActivity extends LocationListenerFragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener{
 
     private static final String TAG = MapsActivity.class.getSimpleName();
 
     private GoogleMap mMap;
-    // TODO Rename List geoLocalisationServiceB
     private GeoLocalisationServiceB geoLocalisationServiceB;
     private boolean mBound;
     private NetworkServiceReceiver serviceReceiver;
@@ -86,8 +89,11 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
         markerIdToAlertID = new HashMap<>();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        //if the activity is restored then we load informations from bundle and
+        //we don't need to request a location
         if (savedInstanceState != null) {
             toDoOnMapReady = new ArrayList<>();
+            //when the map will be ready, we want to add markers to it.
             toDoOnMapReady.add(new Runnable() {
                 @Override
                 public void run() {
@@ -119,13 +125,11 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
     @Override
     protected void onResume() {
         super.onResume();
-
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-
     }
 
     @Override
@@ -143,20 +147,6 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
         outState.putDouble("lat", cameraPosition.target.latitude);
         outState.putDouble("lng", cameraPosition.target.longitude);
         outState.putFloat("zoom", cameraPosition.zoom);
-    }
-
-    private void bindGeoLocalisationService() {
-        if (localisationNeeded) {
-            Intent intent = new Intent(this, GeoLocalisationServiceB.class);
-            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        }
-    }
-
-    private void unBindGeoLocalisationService() {
-        if (mBound) {
-            unbindService(mConnection);
-            mBound = false;
-        }
     }
 
     @Override
@@ -182,15 +172,17 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
             }
         });
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
+        //need to ask permission for api23
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // If not granted, requesting dynamically permissions.
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // No permissions granted.
+                ViewUtilities.showLongToast(this, "Les permissions n'ont pas été données.");
+                return;
+            }
         }
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
@@ -201,6 +193,28 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
         }
     }
 
+    @Override
+    public void onLocationChanged(Location location) {
+        Position position = new Position(location.getLatitude(), location.getLongitude());
+        Log.d(TAG, "New position : position.toString()");
+        moveCamera(position);
+
+        int radius = this.getPreferences(Context.MODE_PRIVATE)
+                .getInt(ProtocolConstants.RADIUS_KEY, ProtocolConstants.DEFAULT_RADIUS);
+        NetworkService.startActionGetListAlert(this, position, radius);
+    }
+
+    @NonNull
+    private static IntentFilter createHomeFilters() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(NetworkService.ACTION_GET_ALERT_LIST_RES);
+        return filter;
+    }
+
+    /**
+     * Add marker to the map
+     * @param position
+     */
     private void addMarker(Position position) {
         Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(position.getLatitude(), position.getLongitude())));
         marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
@@ -222,24 +236,14 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), zoom));
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        Position position = new Position(location.getLatitude(), location.getLongitude());
-        Log.d(TAG, "New position : position.toString()");
-        moveCamera(position);
-
-        int radius = this.getPreferences(Context.MODE_PRIVATE)
-                .getInt(ProtocolConstants.RADIUS_KEY, ProtocolConstants.DEFAULT_RADIUS);
-        NetworkService.startActionGetListAlert(this, position, radius);
-    }
-
     /**
-     * create a  dialog box
+     * create a  dialog box that asks the user to vote for an alert.
      */
     private AlertDialog createDialog(final Position alert) {
         final String alertId = alert.getId();
         boolean showButtons = !alert.isHasVoted();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        //we don't want to show buttons if the user has already voted
         if (showButtons) {
             builder.setPositiveButton("Je m'y trouve", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
@@ -269,7 +273,6 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
         return dialog;
     }
 
-
     private String translateCoordinateToAdress(LatLng latLng) throws IOException {
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         List<Address> adresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
@@ -287,6 +290,22 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
         }
     }
 
+    private void bindGeoLocalisationService() {
+        //When activity is restarted we don't need to bind to GeoLocalisationService
+        if (localisationNeeded) {
+            Intent intent = new Intent(this, GeoLocalisationServiceB.class);
+            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        }
+    }
+
+    private void unBindGeoLocalisationService() {
+        //If we didn't bind to service, we don't unbound
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
+    }
+
     private void registerNetworkServiceReceiver() {
         IntentFilter filter = createHomeFilters();
         LocalBroadcastManager.getInstance(this).registerReceiver(serviceReceiver, filter);
@@ -294,13 +313,6 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
 
     private void unregisterNetworkServiceReceiver() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(serviceReceiver);
-    }
-
-    @NonNull
-    private static IntentFilter createHomeFilters() {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(NetworkService.ACTION_GET_ALERT_LIST_RES);
-        return filter;
     }
 
     public class NetworkServiceReceiver extends BroadcastReceiver {

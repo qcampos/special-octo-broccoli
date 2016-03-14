@@ -22,7 +22,7 @@ import notification_security.upem.fr.securitynotification.R;
 import notification_security.upem.fr.securitynotification.ViewUtilities;
 import notification_security.upem.fr.securitynotification.geolocalisation.Position;
 import notification_security.upem.fr.securitynotification.home.FragmentReceiver.BaseFragmentReceiver;
-import notification_security.upem.fr.securitynotification.map.GeoLocalisationServiceB;
+import notification_security.upem.fr.securitynotification.geolocalisation.GeoLocalisationServiceB;
 import notification_security.upem.fr.securitynotification.map.MapsActivity;
 import notification_security.upem.fr.securitynotification.network.NetworkService;
 import notification_security.upem.fr.securitynotification.network.ProtocolConstants;
