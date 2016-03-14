@@ -17,9 +17,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.maps.SupportMapFragment;
-
-import java.util.HashMap;
 
 import notification_security.upem.fr.securitynotification.R;
 import notification_security.upem.fr.securitynotification.ViewUtilities;
@@ -27,7 +24,6 @@ import notification_security.upem.fr.securitynotification.geolocalisation.Positi
 import notification_security.upem.fr.securitynotification.home.FragmentReceiver.BaseFragmentReceiver;
 import notification_security.upem.fr.securitynotification.map.GeoLocalisationServiceB;
 import notification_security.upem.fr.securitynotification.map.MapsActivity;
-import notification_security.upem.fr.securitynotification.map.UrgencyMapActivity;
 import notification_security.upem.fr.securitynotification.network.NetworkService;
 import notification_security.upem.fr.securitynotification.network.ProtocolConstants;
 
@@ -37,7 +33,7 @@ import static notification_security.upem.fr.securitynotification.ViewUtilities.s
 /**
  * Fragment handling home in idle state, logic.
  */
-public class HomeIdleFragment extends BaseFragmentReceiver implements AsyncGPSProvider.AsyncGPSListener {
+public class HomeIdleFragment extends BaseFragmentReceiver implements LocationListener {
 
     // The logging TAG.
     private static final String TAG = HomeIdleFragment.class.getSimpleName();
@@ -52,7 +48,37 @@ public class HomeIdleFragment extends BaseFragmentReceiver implements AsyncGPSPr
     private Position position;
 
     private int count = CLICK_NUMBER;
-    private AsyncGPSProvider asyncGPSProvider;
+
+    // Gps fields.
+    private boolean mBound;
+    private GeoLocalisationServiceB geoLocalisationServiceB;
+
+    private final ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            GeoLocalisationServiceB.LocalBinder binder = (GeoLocalisationServiceB.LocalBinder) service;
+            geoLocalisationServiceB = binder.getService();
+            Log.d(TAG, "onServiceConnected - Connected.");
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        bindGeoLocalisationService();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        unBindGeoLocalisationService();
+    }
 
     @Nullable
     @Override
@@ -67,8 +93,6 @@ public class HomeIdleFragment extends BaseFragmentReceiver implements AsyncGPSPr
         setLocalViews();
         // Setting listeners.
         setClickListeners();
-        // The gps asyncGPSProvider.
-        asyncGPSProvider = new AsyncGPSProvider(getActivity(), this);
     }
 
     @Override
@@ -145,9 +169,19 @@ public class HomeIdleFragment extends BaseFragmentReceiver implements AsyncGPSPr
             @Override
             public void onClick(View v) {
                 count--;
+
                 if (count <= 0) {
+                    // If the service is not bound.
+                    if (!mBound) {
+                        Log.d(TAG, "onClick - Service not bound.");
+                        ViewUtilities.showLongToast(getHomeActivity(), "Position indisponible, veuillez recommencer ultérieurement.");
+                        count = CLICK_NUMBER;
+                        updateAlertCount();
+                        return;
+                    }
+                    // Otherwise, requesting the current location.
+                    geoLocalisationServiceB.subscribeLocationUpdate(getHomeActivity(), HomeIdleFragment.this, 1);
                     disableFields(); // TODO don't disable all fields here, please allows the cancel.
-                    asyncGPSProvider.execute();
                     return;
                 }
                 updateAlertCount();
@@ -183,21 +217,26 @@ public class HomeIdleFragment extends BaseFragmentReceiver implements AsyncGPSPr
         });
     }
 
+
     @Override
-    public void onUpdatedPositionSuccess(Position position) {
-        this.position = position;
+    public void onLocationChanged(Location location) {
+        Log.d(TAG, "onLocationChanged - Location received : " + location);
+        // Setting the position.
+        position = new Position(location.getLatitude(), location.getLongitude());
         requestNetworkAction();
     }
 
-    @Override
-    public void onUpdatedPositionFailed() {
-        // TODO handle error when retrieving by showing an error prompt. (With please retrieve).
+
+    private void bindGeoLocalisationService() {
+        HomeActivity homeActivity = getHomeActivity();
+        Intent intent = new Intent(homeActivity, GeoLocalisationServiceB.class);
+        homeActivity.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
-    @Override
-    public void onPermissionFailed() {
-        HomeActivity homeActivity = getHomeActivity();
-        homeActivity.showFragment(new HomeIdleFragment());
-        ViewUtilities.showShortToast(homeActivity, "Veuillez accepter la permission.");
+    private void unBindGeoLocalisationService() {
+        if (mBound) {
+            getHomeActivity().unbindService(mConnection);
+            mBound = false;
+        }
     }
 }

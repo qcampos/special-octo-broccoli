@@ -80,9 +80,11 @@ public class SplashFragment extends FragmentReceiver.BaseFragmentReceiver {
         // If an automatic connection can be performed, doing it.
         if (autoConnect()) {
             // Asking for manual connection.
+            Log.d(TAG, "initializeAutoConnection - No auto-connect");
             homeActivity.showFragment(new ConnectionFragment());
             return;
         }
+        Log.d(TAG, "initializeAutoConnection - Auto conenction requested : login " + login + " pin " + pin);
         // Requesting automatic connection.
         requestNetworkAction();
     }
@@ -91,7 +93,7 @@ public class SplashFragment extends FragmentReceiver.BaseFragmentReceiver {
         SharedPreferences preferences = getHomeActivity().getPreferences(Context.MODE_PRIVATE);
         login = preferences.getString(ProtocolConstants.LOGIN, ProtocolConstants.UNSET_PREFERENCE);
         pin = preferences.getString(ProtocolConstants.PIN, ProtocolConstants.UNSET_PREFERENCE);
-        return login == ProtocolConstants.UNSET_PREFERENCE || pin == ProtocolConstants.UNSET_PREFERENCE;
+        return true; //login == ProtocolConstants.UNSET_PREFERENCE || pin == ProtocolConstants.UNSET_PREFERENCE;
     }
 
     private boolean isAlerting() {

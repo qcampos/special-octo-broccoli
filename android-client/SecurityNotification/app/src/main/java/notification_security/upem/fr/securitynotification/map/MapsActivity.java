@@ -48,12 +48,14 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
     private static final String TAG = MapsActivity.class.getSimpleName();
 
     private GoogleMap mMap;
+    // TODO Rename List geoLocalisationServiceB
     private GeoLocalisationServiceB geoLocalisationServiceB;
     private boolean mBound;
     private NetworkServiceReceiver serviceReceiver;
     private HashMap<String, Position> markerIdToAlertID;
     private List<Runnable> toDoOnMapReady;
     private boolean localisationNeeded;
+
     private final ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {

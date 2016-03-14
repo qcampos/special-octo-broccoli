@@ -3,6 +3,7 @@ package notification_security.upem.fr.securitynotification.map;
 import android.Manifest;
 import android.app.Activity;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -11,6 +12,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.google.android.gms.appindexing.AppIndex;
@@ -29,12 +31,14 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import java.util.ArrayList;
 import java.util.List;
 
+import notification_security.upem.fr.securitynotification.ViewUtilities;
+
 
 /**
  * Created by anis on 06/03/16.
  * Bound service that provide a subscribeLocationUpdate method.
  */
-public class GeoLocalisationServiceB extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener /*, com.google.android.gms.location.LocationListener */{
+public class GeoLocalisationServiceB extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener /*, com.google.android.gms.location.LocationListener */ {
     private final IBinder mBinder = new LocalBinder();
     private static final String TAG = GeoLocalisationServiceB.class.getSimpleName();
     private GoogleApiClient mGoogleApiClient;
@@ -61,25 +65,40 @@ public class GeoLocalisationServiceB extends Service implements GoogleApiClient.
         Log.d(TAG, "service destroyed");
     }
 
-    public void subscribeLocationUpdate(final Activity activity, final LocationListener listener, final int nbUpdate){
-        if(mGoogleApiClient.isConnected()){
-            requestUpdateLocation(activity,listener, nbUpdate);
-        }
-        else{
+    public void subscribeLocationUpdate(final Activity activity, final LocationListener listener, final int nbUpdate) {
+        if (mGoogleApiClient.isConnected()) {
+            requestUpdateLocation(activity, listener, nbUpdate);
+        } else {
             requestWaitingConnectionQueue.add(new Runnable() {
                 @Override
                 public void run() {
-                    requestUpdateLocation(activity,listener, nbUpdate);
+                    requestUpdateLocation(activity, listener, nbUpdate);
                 }
             });
         }
     }
 
-    private void requestUpdateLocation(Activity activity, LocationListener listener, int nbUpdate){
+    private void requestUpdateLocation(Activity activity, LocationListener listener, int nbUpdate) {
         Log.d(TAG, "requested");
         if (ActivityCompat.checkSelfPermission(GeoLocalisationServiceB.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG,"shit");
-            return ;
+            Log.d(TAG, "shit");
+            return;
+        }
+        // TODO Do the same into the MapsActivity.
+        // Checking permissions.
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // If not granted, requesting dynamically permissions.
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            Log.d(TAG, "requestUpdateLocation - requestPermission.");
+            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // No permissions granted.
+                return;
+            }
+            // Toasting it.
+            ViewUtilities.showLongToast(activity, "Les permissions n'ont pas été données.");
+            Log.d(TAG, "requestUpdateLocation - permission granted.");
         }
         LocationRequest mLocationRequest = createLocationRequest(nbUpdate);
         checkLocationSettings(activity, mLocationRequest);
@@ -93,12 +112,12 @@ public class GeoLocalisationServiceB extends Service implements GoogleApiClient.
         //mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setSmallestDisplacement(500);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        if(nbUpdate > 0)
+        if (nbUpdate > 0)
             mLocationRequest.setNumUpdates(nbUpdate);
         return mLocationRequest;
     }
 
-    private void checkLocationSettings(final Activity activity, LocationRequest mLocationRequest){
+    private void checkLocationSettings(final Activity activity, LocationRequest mLocationRequest) {
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest);
 
         PendingResult<LocationSettingsResult> result =
@@ -139,13 +158,15 @@ public class GeoLocalisationServiceB extends Service implements GoogleApiClient.
     @Override
     public void onConnected(Bundle bundle) {
         Log.d(TAG, "connected");
-        for(Runnable request : requestWaitingConnectionQueue){
+        for (Runnable request : requestWaitingConnectionQueue) {
             request.run();
         }
     }
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) { Log.d(TAG, "connection failed"); }
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.d(TAG, "connection failed");
+    }
 
     @Override
     public void onConnectionSuspended(int i) {
