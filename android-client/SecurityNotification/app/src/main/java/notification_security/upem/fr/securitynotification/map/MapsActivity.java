@@ -43,6 +43,11 @@ import notification_security.upem.fr.securitynotification.geolocalisation.Positi
 import notification_security.upem.fr.securitynotification.network.NetworkService;
 import notification_security.upem.fr.securitynotification.network.ProtocolConstants;
 
+/**
+ * Maps that contains markers for alerts near user.
+ * When started the activity bind to the GeoLocalisationService and ask location, then
+ * the activity ask NetworkService for alerts near, and display markers on their positions.
+ */
 public class MapsActivity extends LocationListenerFragmentActivity implements OnMapReadyCallback {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
