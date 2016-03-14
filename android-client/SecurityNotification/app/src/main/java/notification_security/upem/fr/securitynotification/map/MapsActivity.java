@@ -1,5 +1,6 @@
 package notification_security.upem.fr.securitynotification.map;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -8,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
@@ -15,6 +17,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -34,13 +37,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import notification_security.upem.fr.securitynotification.R;
 import notification_security.upem.fr.securitynotification.geolocalisation.Position;
 import notification_security.upem.fr.securitynotification.network.NetworkService;
+import notification_security.upem.fr.securitynotification.network.ProtocolConstants;
 
-public class MapsActivity extends LocationListenerFragmentActivity implements OnMapReadyCallback{
+public class MapsActivity extends LocationListenerFragmentActivity implements OnMapReadyCallback {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
 
@@ -57,9 +60,10 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
             GeoLocalisationServiceB.LocalBinder binder = (GeoLocalisationServiceB.LocalBinder) service;
             geoLocalisationServiceB = binder.getService();
             geoLocalisationServiceB.subscribeLocationUpdate(MapsActivity.this, MapsActivity.this, 1);
-            Log.d(TAG,"subscribed");
+            Log.d(TAG, "subscribed");
             mBound = true;
         }
+
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             mBound = false;
@@ -75,7 +79,7 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
         markerIdToAlertID = new HashMap<>();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        if(savedInstanceState != null){
+        if (savedInstanceState != null) {
             toDoOnMapReady = new ArrayList<>();
             toDoOnMapReady.add(new Runnable() {
                 @Override
@@ -84,15 +88,14 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
                     double lng = savedInstanceState.getDouble("lng");
                     float zoom = savedInstanceState.getFloat("zoom");
                     moveCamera(lat, lng, zoom);
-                    HashMap<String, Position> positions = (HashMap<String, Position>)savedInstanceState.getSerializable("positions");
-                    for(Position position : positions.values()){
+                    HashMap<String, Position> positions = (HashMap<String, Position>) savedInstanceState.getSerializable("positions");
+                    for (Position position : positions.values()) {
                         addMarker(position);
                     }
                 }
             });
             localisationNeeded = false;
-        }
-        else{
+        } else {
             localisationNeeded = true;
         }
         serviceReceiver = new NetworkServiceReceiver();
@@ -135,15 +138,15 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
         outState.putFloat("zoom", cameraPosition.zoom);
     }
 
-    private void bindGeoLocalisationService(){
-        if(localisationNeeded){
+    private void bindGeoLocalisationService() {
+        if (localisationNeeded) {
             Intent intent = new Intent(this, GeoLocalisationServiceB.class);
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
-    private void unBindGeoLocalisationService(){
-        if(mBound){
+    private void unBindGeoLocalisationService() {
+        if (mBound) {
             unbindService(mConnection);
             mBound = false;
         }
@@ -160,7 +163,7 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
                     return false;
                 }
                 Position alertTargeted = markerIdToAlertID.get(marker.getId());
-                Log.d(TAG, "Alert targeted  " + alertTargeted.getId() +"has voted " + alertTargeted.isHasVoted() + " ");
+                Log.d(TAG, "Alert targeted  " + alertTargeted.getId() + "has voted " + alertTargeted.isHasVoted() + " ");
                 AlertDialog dialog = createDialog(alertTargeted);
                 try {
                     dialog.setMessage(translateCoordinateToAdress(marker.getPosition()));
@@ -171,10 +174,21 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
                 return true;
             }
         });
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
-        if(toDoOnMapReady != null){
-            for(Runnable toDo : toDoOnMapReady){
+        if (toDoOnMapReady != null) {
+            for (Runnable toDo : toDoOnMapReady) {
                 toDo.run();
             }
         }
@@ -193,11 +207,11 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
         }
     }
 
-    private void moveCamera(Position position ){
+    private void moveCamera(Position position) {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(position.getLatitude(), position.getLongitude()), 11));
     }
 
-    private void moveCamera(double lat, double lng, float zoom){
+    private void moveCamera(double lat, double lng, float zoom) {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), zoom));
     }
 
@@ -206,7 +220,10 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
         Position position = new Position(location.getLatitude(), location.getLongitude());
         Log.d(TAG, "New position : position.toString()");
         moveCamera(position);
-        NetworkService.startAskAlertList(this, position);
+
+        int radius = this.getPreferences(Context.MODE_PRIVATE)
+                .getInt(ProtocolConstants.RADIUS_KEY, ProtocolConstants.DEFAULT_RADIUS);
+        NetworkService.startActionGetListAlert(this, position, radius);
     }
 
     /**
@@ -216,7 +233,7 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
         final String alertId = alert.getId();
         boolean showButtons = !alert.isHasVoted();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        if(showButtons){
+        if (showButtons) {
             builder.setPositiveButton("Je m'y trouve", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     Log.d(TAG, "User clicked OK button number " + alertId);
@@ -231,8 +248,7 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
                     NetworkService.startValidateAction(MapsActivity.this, alertId, false, true);
                 }
             });
-        }
-        else{
+        } else {
             builder.setNeutralButton("Vous avez déja voté", null);
         }
         final AlertDialog dialog = builder.create();
@@ -249,19 +265,17 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
 
     private String translateCoordinateToAdress(LatLng latLng) throws IOException {
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-        List<Address> adresses= geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-        if (adresses.size() > 0)
-        {
+        List<Address> adresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+        if (adresses.size() > 0) {
             StringBuilder sb = new StringBuilder();
-            for(int i = 0; i<=adresses.get(0).getMaxAddressLineIndex(); i++){
+            for (int i = 0; i <= adresses.get(0).getMaxAddressLineIndex(); i++) {
                 sb.append(adresses.get(0).getAddressLine(i));
-                if(i < adresses.get(0).getMaxAddressLineIndex()){
+                if (i < adresses.get(0).getMaxAddressLineIndex()) {
                     sb.append(", ");
                 }
             }
             return sb.toString();
-        }
-        else{
+        } else {
             return "Weird place";
         }
     }
@@ -289,13 +303,13 @@ public class MapsActivity extends LocationListenerFragmentActivity implements On
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            switch(action){
-                case NetworkService.ACTION_GET_ALERT_LIST_RES :
-                    ArrayList<Position> positions = intent.getParcelableArrayListExtra(NetworkService.EXTRA_ALERT_LIST);
+            switch (action) {
+                case NetworkService.ACTION_GET_ALERT_LIST_RES:
+                    ArrayList<Position> positions = intent.getParcelableArrayListExtra(NetworkService.EXTRA_LIST_POSITIONS);
                     Log.d(TAG, "size " + positions.size());
                     addMarkers(positions);
                     break;
-                default :
+                default:
                     break;
             }
         }

@@ -15,6 +15,9 @@
     <uses-permission android:name="android.permission.ACCESS_GPS" />
     <uses-permission android:name="android.permission.ACCESS_LOCATION" />
 
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -34,6 +37,9 @@
             android:name=".network.NetworkService"
             android:exported="false"></service>
 
+        <receiver
+            android:name=".home.HomeActivity$NetworkServiceReceiver"
+            android:exported="false"></receiver>
 
         <activity
             android:name=".map.MapsActivity"
@@ -53,6 +59,42 @@
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="@string/google_maps_key" />
+
+
+        <service
+            android:name=".RegistrationService"
+            android:exported="false"></service>
+
+
+        <service
+            android:name=".ListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".InstanceIDListener"
+            android:exported="false">
+
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID" />
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+                <category android:name="notification_security.upem.fr.securitynotification" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

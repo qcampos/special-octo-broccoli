@@ -125,7 +125,7 @@ public class SignUpFragment extends BaseFragmentReceiver {
             @Override
             public void onClick(View v) {
                 String firstName = etFirstname.getText().toString().trim();
-                String lastName = etFirstname.getText().toString().trim();
+                String lastName = etLastname.getText().toString().trim();
                 String email = etEmail.getText().toString().trim();
                 String phone = etPhone.getText().toString().trim();
                 String pin = etPIN.getText().toString().trim();
