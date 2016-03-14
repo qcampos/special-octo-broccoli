@@ -1,7 +1,11 @@
 package notification_security.upem.fr.securitynotification.network.stub;
 
+import android.util.Log;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -11,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author BILISSOR YANN
@@ -39,7 +44,16 @@ class RequestFactory {
         JavaType type = mapper.getTypeFactory().constructType(List.class, internal);
         return mapper.readValue(in, type);
     }
+    public static <T> List<T> mapValuesToCollection(String in, Class<T> internal) throws IOException {
+        JavaType type = mapper.getTypeFactory().constructType(List.class, internal);
+        return mapper.readValue(in, type);
+    }
 
+
+
+    public static <T> T mapValue(String json,Class<T> clazz) throws IOException {
+     return mapper.readValue(json,clazz);
+    }
     /**
      * Create new JSON output based on given parameters for register request
      *

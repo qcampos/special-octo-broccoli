@@ -14,8 +14,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import notification_security.upem.fr.securitynotification.geolocalisation.Position;
 
@@ -45,7 +48,7 @@ public class NotificationStub implements ISecurityNotification {
     /**
      * @param ctx
      */
-    public NotificationStub(Context ctx){
+    public NotificationStub(Context ctx) {
 
         this.context = ctx;
     }
@@ -155,8 +158,26 @@ public class NotificationStub implements ISecurityNotification {
             IOHelper.post(connection, RequestFactory.createDescAlertRequest(uuid, alertsID));
 
             if (isSuccessfulRequest(connection)) {
-                List<RequestFactory.Event> events = RequestFactory.mapValuesToCollection(connection.getInputStream(), RequestFactory.Event.class);
-                return mapEventToPosition(events);
+
+                String value = IOHelper.readFully(connection.getInputStream());
+                Log.d(TAG, "getDesc :" + value + " with list " + alertsID);
+
+                LinkedHashMap<String, LinkedHashMap<String, String>> events = RequestFactory.mapValue(value, LinkedHashMap.class);
+
+
+                                /* Map JSON to Java Object*/
+                List<RequestFactory.Event> res = new ArrayList<>();
+
+                /* Map Entry to ID. No java 8 */
+                for (LinkedHashMap<String, String> tmp : events.values()) {
+
+                    for (String tmp2 : tmp.values()) {
+                        res.add(RequestFactory.mapValue(tmp2, RequestFactory.Event.class));
+                    }
+
+                }
+
+                return mapEventToPosition(res);
             }
 
         } catch (IOException e) {
@@ -258,7 +279,7 @@ public class NotificationStub implements ISecurityNotification {
 
         if (connection.getResponseCode() >= HttpURLConnection.HTTP_BAD_REQUEST) {
             RequestFactory.DataReader reader = RequestFactory.readDataFrom(connection.getErrorStream());
-            persistErrors(context,reader.error.code,reader.error.message);
+            persistErrors(context, reader.error.code, reader.error.message);
             return false;
         }
 
@@ -276,9 +297,9 @@ public class NotificationStub implements ISecurityNotification {
     private RequestFactory.DataReader getServerResponse(HttpURLConnection connection) throws IOException {
 
         if (connection.getResponseCode() >= HttpURLConnection.HTTP_BAD_REQUEST) {
-            RequestFactory.DataReader reader =  RequestFactory.readDataFrom(connection.getErrorStream());
-            Log.v(TAG,reader.error.message);
-            persistErrors(context,reader.error.code,reader.error.message);
+            RequestFactory.DataReader reader = RequestFactory.readDataFrom(connection.getErrorStream());
+            Log.v(TAG, reader.error.message);
+            persistErrors(context, reader.error.code, reader.error.message);
             return reader;
         }
 
@@ -296,7 +317,7 @@ public class NotificationStub implements ISecurityNotification {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         sharedPreferences.edit().putString(ERROR_CODE, code).apply();
-        sharedPreferences.edit().putString(ERROR_NAME,value).apply();
+        sharedPreferences.edit().putString(ERROR_NAME, value).apply();
     }
 
     /**

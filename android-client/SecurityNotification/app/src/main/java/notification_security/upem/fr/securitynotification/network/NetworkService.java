@@ -21,7 +21,7 @@ import java.util.List;
 
 import notification_security.upem.fr.securitynotification.RegistrationService;
 import notification_security.upem.fr.securitynotification.geolocalisation.Position;
-import notification_security.upem.fr.securitynotification.map.UrgencyMapActivity;
+import notification_security.upem.fr.securitynotification.map.MapsActivity;
 import notification_security.upem.fr.securitynotification.network.stub.NotificationStub;
 
 /**
@@ -350,6 +350,10 @@ public static void startValidateAction(Context context, String alertID, boolean 
         /* Network request */
         List<String> keys = stub.getAlerts(data.getString(EXTRA_SESSION_ID), latitude, longitude, radius);
 
+        if(keys.size() == 0)
+            return;
+
+        Log.d(TAG, "handleActionListAlert :  "+keys.toString());
         /* Get each position details */
         List<Position> positions = stub.getDesc(data.getString(EXTRA_SESSION_ID), keys.toArray(new String[keys.size()]));
 
@@ -411,13 +415,14 @@ public static void startValidateAction(Context context, String alertID, boolean 
 
         /* Get positions */
         final List<Position> positions = stub.getDesc(data.getString(EXTRA_SESSION_ID), keys.toArray(new String[keys.size()]));
+        Log.d(TAG, "handleActionUserTopic - number : " + keys.size() + " positions : " + positions);
 
         /* Get Access mode */
         final boolean isDirectAccess = data.getBoolean(EXTRA_CHANGE_ACCESS);
 
         /* we only to send back the new intent locally */
         if (isDirectAccess) {
-
+            Log.d(TAG, "handleActionUserTopic answering in direct mode : ");
             onNewPositionsAvailable(true, positions);
 
         }
@@ -425,6 +430,7 @@ public static void startValidateAction(Context context, String alertID, boolean 
         else {
 
             /* Send a new notification*/
+            Log.d(TAG, "handleActionUserTopic answering in indirect mode (notification) : " + keys.size());
             notification(this, keys.size() + DANGER_MSG, "Danger", positions);
         }
 
@@ -621,8 +627,7 @@ public static void startValidateAction(Context context, String alertID, boolean 
      * @param message the message to display
      */
     public void notification(Context ctx, String title, String message, List<Position> positions) {
-
-        Intent intent = new Intent(ctx, UrgencyMapActivity.class);
+        Intent intent = new Intent(ctx, MapsActivity.class);
         intent.setAction(ACTION_GET_ALERT_LIST_RES);
         intent.putExtra(EXTRA_RES, true);
         intent.putParcelableArrayListExtra(EXTRA_LIST_POSITIONS, new ArrayList<>(positions));

@@ -80,10 +80,6 @@ public class GeoLocalisationServiceB extends Service implements GoogleApiClient.
 
     private void requestUpdateLocation(Activity activity, LocationListener listener, int nbUpdate) {
         Log.d(TAG, "requested");
-        if (ActivityCompat.checkSelfPermission(GeoLocalisationServiceB.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "shit");
-            return;
-        }
         // TODO Do the same into the MapsActivity.
         // Checking permissions.
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -94,10 +90,10 @@ public class GeoLocalisationServiceB extends Service implements GoogleApiClient.
             if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                     && ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // No permissions granted.
+                ViewUtilities.showLongToast(activity, "Les permissions n'ont pas été données.");
                 return;
             }
             // Toasting it.
-            ViewUtilities.showLongToast(activity, "Les permissions n'ont pas été données.");
             Log.d(TAG, "requestUpdateLocation - permission granted.");
         }
         LocationRequest mLocationRequest = createLocationRequest(nbUpdate);

@@ -44,9 +44,6 @@
         <activity
             android:name=".map.MapsActivity"
             android:label="@string/title_activity_maps"></activity>
-        <activity
-            android:name=".map.UrgencyMapActivity"
-            android:label="@string/title_activity_urgence_map" />
 
         <service android:name=".map.GeoLocalisationServiceB"></service>
         <!--
