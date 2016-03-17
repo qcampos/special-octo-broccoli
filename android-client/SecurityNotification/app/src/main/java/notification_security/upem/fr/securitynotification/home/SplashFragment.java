@@ -93,7 +93,7 @@ public class SplashFragment extends FragmentReceiver.BaseFragmentReceiver {
         SharedPreferences preferences = getHomeActivity().getPreferences(Context.MODE_PRIVATE);
         login = preferences.getString(ProtocolConstants.LOGIN, ProtocolConstants.UNSET_PREFERENCE);
         pin = preferences.getString(ProtocolConstants.PIN, ProtocolConstants.UNSET_PREFERENCE);
-        return true; //login == ProtocolConstants.UNSET_PREFERENCE || pin == ProtocolConstants.UNSET_PREFERENCE;
+        return login == ProtocolConstants.UNSET_PREFERENCE || pin == ProtocolConstants.UNSET_PREFERENCE;
     }
 
     private boolean isAlerting() {
