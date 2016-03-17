@@ -25,7 +25,8 @@
         android:theme="@style/AppThemess">
         <activity
             android:name=".home.HomeActivity"
-            android:label="@string/title_activity_home">
+            android:label="@string/title_activity_home"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
