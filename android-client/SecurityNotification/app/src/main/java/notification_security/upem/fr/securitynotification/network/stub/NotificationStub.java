@@ -44,6 +44,7 @@ public class NotificationStub implements ISecurityNotification {
     public static final String ERROR_CODE = SERVER_URL + "/ERROR_CODE";
     public static final String ERROR_NAME = SERVER_URL + "/ERROR_NAME";
     private Context context;
+    private LinkedHashMap<String, Object> values;
 
     /**
      * @param ctx
@@ -160,24 +161,25 @@ public class NotificationStub implements ISecurityNotification {
             if (isSuccessfulRequest(connection)) {
 
                 String value = IOHelper.readFully(connection.getInputStream());
-                Log.d(TAG, "getDesc :" + value + " with list " + alertsID);
-
-                LinkedHashMap<String, LinkedHashMap<String, String>> events = RequestFactory.mapValue(value, LinkedHashMap.class);
-
-
-                                /* Map JSON to Java Object*/
+                LinkedHashMap<String, LinkedHashMap<String, Object>> events = RequestFactory.mapValue(value, LinkedHashMap.class);
                 List<RequestFactory.Event> res = new ArrayList<>();
 
-                /* Map Entry to ID. No java 8 */
-                for (LinkedHashMap<String, String> tmp : events.values()) {
+                for (String key : alertsID) {
 
-                    for (String tmp2 : tmp.values()) {
-                        res.add(RequestFactory.mapValue(tmp2, RequestFactory.Event.class));
-                    }
+                    LinkedHashMap<String, Object> values = events.get(key);
+                    RequestFactory.Event e = new RequestFactory.Event();
+
+                    e.eventID = values.get("id").toString();
+                    e.hasVoted = Boolean.valueOf(values.get("hasVoted") + "");
+                    e.latitude = Double.valueOf(values.get("lat").toString());
+                    e.longitude = Double.valueOf(values.get("long").toString());
+                    e.score = Double.valueOf(values.get("score") + "");
+                    res.add(e);
 
                 }
 
                 return mapEventToPosition(res);
+
             }
 
         } catch (IOException e) {

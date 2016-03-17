@@ -15,6 +15,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import notification_security.upem.fr.securitynotification.ViewUtilities;
+import notification_security.upem.fr.securitynotification.geolocalisation.GeoLocalisationServiceB;
 import notification_security.upem.fr.securitynotification.geolocalisation.Position;
 
 /**
@@ -22,7 +23,7 @@ import notification_security.upem.fr.securitynotification.geolocalisation.Positi
  * No need to use more complex services provided by the very application
  * In the HomeActivity.
  *
- * @see notification_security.upem.fr.securitynotification.map.GeoLocalisationServiceB
+ * @see GeoLocalisationServiceB
  * for more evolved functionnalities.
  */
 public class AsyncGPSProvider extends AsyncTask<Void, Void, Position> implements LocationListener {

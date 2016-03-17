@@ -1,9 +1,8 @@
-package notification_security.upem.fr.securitynotification.map;
+package notification_security.upem.fr.securitynotification.geolocalisation;
 
 import android.Manifest;
 import android.app.Activity;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -44,6 +43,26 @@ public class GeoLocalisationServiceB extends Service implements GoogleApiClient.
     private GoogleApiClient mGoogleApiClient;
     private List<Runnable> requestWaitingConnectionQueue;
 
+    /**
+     * When you call this method, you will receive nbUpdate times the user location on the onLocationUpdate method
+     * of listener.
+     * @param activity activity currently running foreground
+     * @param listener location update listener
+     * @param nbUpdate number update requested
+     */
+    public void subscribeLocationUpdate(final Activity activity, final LocationListener listener, final int nbUpdate) {
+        if (mGoogleApiClient.isConnected()) {
+            requestUpdateLocation(activity, listener, nbUpdate);
+        } else {
+            requestWaitingConnectionQueue.add(new Runnable() {
+                @Override
+                public void run() {
+                    requestUpdateLocation(activity, listener, nbUpdate);
+                }
+            });
+        }
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -63,19 +82,6 @@ public class GeoLocalisationServiceB extends Service implements GoogleApiClient.
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "service destroyed");
-    }
-
-    public void subscribeLocationUpdate(final Activity activity, final LocationListener listener, final int nbUpdate) {
-        if (mGoogleApiClient.isConnected()) {
-            requestUpdateLocation(activity, listener, nbUpdate);
-        } else {
-            requestWaitingConnectionQueue.add(new Runnable() {
-                @Override
-                public void run() {
-                    requestUpdateLocation(activity, listener, nbUpdate);
-                }
-            });
-        }
     }
 
     private void requestUpdateLocation(Activity activity, LocationListener listener, int nbUpdate) {

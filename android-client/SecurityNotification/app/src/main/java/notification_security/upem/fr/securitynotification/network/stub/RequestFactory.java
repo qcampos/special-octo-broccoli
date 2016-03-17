@@ -44,13 +44,15 @@ class RequestFactory {
         JavaType type = mapper.getTypeFactory().constructType(List.class, internal);
         return mapper.readValue(in, type);
     }
-    public static <T> List<T> mapValuesToCollection(String in, Class<T> internal) throws IOException {
-        JavaType type = mapper.getTypeFactory().constructType(List.class, internal);
-        return mapper.readValue(in, type);
-    }
 
-
-
+    /**
+     * Map value from input string to given class
+     * @param json
+     * @param clazz
+     * @param <T>
+     * @return
+     * @throws IOException
+     */
     public static <T> T mapValue(String json,Class<T> clazz) throws IOException {
      return mapper.readValue(json,clazz);
     }
