@@ -51,6 +51,7 @@ public class HomeIdleFragment extends BaseFragmentReceiver implements LocationLi
 
     // Gps fields.
     private boolean mBound;
+    private boolean hasRequestAlert;
     private GeoLocalisationServiceB geoLocalisationServiceB;
 
     private final ServiceConnection mConnection = new ServiceConnection() {
@@ -93,16 +94,30 @@ public class HomeIdleFragment extends BaseFragmentReceiver implements LocationLi
         setLocalViews();
         // Setting listeners.
         setClickListeners();
+
+        // Asking for delayed positions (then notifying the server on receive).
+        btAlert.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!mBound) {
+                    Log.d(TAG, "onActivityCreated - Service not bound.");
+                    return;
+                }
+                Log.d(TAG, "onActivityCreated - Service bound.");
+                geoLocalisationServiceB.subscribeLocationUpdate(getHomeActivity(), HomeIdleFragment.this, 1);
+            }
+        }, 1000);
     }
+
 
     @Override
     void performNetworkRequest(HomeActivity homeActivity, String... params) {
         // TODO retrieve good position.
-        int radius = homeActivity.getPreferences(Context.MODE_PRIVATE)
-                .getInt(ProtocolConstants.RADIUS_KEY, ProtocolConstants.DEFAULT_RADIUS);
+        int radius = readRadius(homeActivity);
         Log.d(TAG, "performNetworkRequest - requesting with position : " + position.getLatitude() + " " + position.getLongitude());
         NetworkService.startAddAlertAction(homeActivity, position, Integer.toString(radius));
     }
+
 
     @Override
     void processNetworkResult(HomeActivity homeActivity, Intent intent) {
@@ -180,6 +195,7 @@ public class HomeIdleFragment extends BaseFragmentReceiver implements LocationLi
                         return;
                     }
                     // Otherwise, requesting the current location.
+                    hasRequestAlert = true;
                     geoLocalisationServiceB.subscribeLocationUpdate(getHomeActivity(), HomeIdleFragment.this, 1);
                     disableFields(); // TODO don't disable all fields here, please allows the cancel.
                     return;
@@ -220,12 +236,24 @@ public class HomeIdleFragment extends BaseFragmentReceiver implements LocationLi
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.d(TAG, "onLocationChanged - Location received : " + location);
+        Log.d(TAG, "onLocationChanged - Location received : " + location + " has requested alert : " + hasRequestAlert);
         // Setting the position.
         position = new Position(location.getLatitude(), location.getLongitude());
+        // Location received for a first getlist() telling the server our position.
+        if (!hasRequestAlert) {
+            HomeActivity homeActivity = getHomeActivity();
+            NetworkService.startActionGetListAlert(homeActivity, position, readRadius(homeActivity));
+            return;
+        }
+        // Otherwise only requesting an alert.
         requestNetworkAction();
     }
 
+
+    private int readRadius(HomeActivity homeActivity) {
+        return homeActivity.getPreferences(Context.MODE_PRIVATE)
+                .getInt(ProtocolConstants.RADIUS_KEY, ProtocolConstants.DEFAULT_RADIUS);
+    }
 
     private void bindGeoLocalisationService() {
         HomeActivity homeActivity = getHomeActivity();
